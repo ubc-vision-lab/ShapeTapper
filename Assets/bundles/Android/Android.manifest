@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 2395791747
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: images
+      Dependencies: {}
+    Info_1:
+      Name: new_images
+      Dependencies: {}

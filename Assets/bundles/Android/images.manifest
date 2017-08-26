@@ -1,0 +1,70 @@
+ManifestFileVersion: 0
+CRC: 2513976655
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: d85d4acc8db31c7eb16ec06a022a12b1
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 7c49e4a6bdbe8305f3acec90533ce216
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 60
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+Assets:
+- Assets/prefab/shape14.prefab
+- Assets/Resources/Prefabs/shape4.prefab
+- Assets/prefab/shape9.prefab
+- Assets/prefab/shape17.prefab
+- Assets/prefab/shape7.prefab
+- Assets/Resources/Prefabs/shape14.prefab
+- Assets/prefab/shape11.prefab
+- Assets/Resources/Prefabs/mask5.prefab
+- Assets/prefab/shape3.prefab
+- Assets/prefab/shape6.prefab
+- Assets/Resources/Prefabs/mask4.prefab
+- Assets/Resources/Prefabs/mask1.prefab
+- Assets/prefab/shape1.prefab
+- Assets/Resources/Prefabs/shape1.prefab
+- Assets/prefab/shape18.prefab
+- Assets/Resources/Prefabs/shape12.prefab
+- Assets/Resources/Prefabs/shape7.prefab
+- Assets/prefab/shape5.prefab
+- Assets/prefab/shape12.prefab
+- Assets/Resources/Prefabs/shape9.prefab
+- Assets/Resources/Prefabs/shape15.prefab
+- Assets/Resources/Prefabs/shape8.prefab
+- Assets/prefab/shape13.prefab
+- Assets/Resources/Prefabs/shape3.prefab
+- Assets/Resources/Prefabs/shape5.prefab
+- Assets/prefab/shape4.prefab
+- Assets/prefab/shape2.prefab
+- Assets/Resources/Prefabs/shape6.prefab
+- Assets/prefab/shape10.prefab
+- Assets/Resources/Prefabs/shape16.prefab
+- Assets/Resources/Prefabs/mask2.prefab
+- Assets/Resources/Prefabs/shape13.prefab
+- Assets/Resources/Prefabs/shape2.prefab
+- Assets/Resources/Prefabs/shape11.prefab
+- Assets/Resources/Prefabs/shape10.prefab
+- Assets/Resources/Prefabs/shape17.prefab
+- Assets/prefab/shape16.prefab
+- Assets/Resources/Prefabs/mask3.prefab
+- Assets/prefab/shape8.prefab
+- Assets/prefab/shape15.prefab
+- Assets/Resources/Prefabs/shape18.prefab
+Dependencies: []
