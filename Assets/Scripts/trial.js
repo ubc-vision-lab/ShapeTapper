@@ -177,13 +177,14 @@ function Update () {
 			//print(mouseXY);
 			var hit:RaycastHit2D = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(touchXY), Vector2.zero);
 
-			if(hit.collider != null && hit.collider.name == dbgmsg){ // dbgmsg = target name?
+			if(oddball_flag) { // just bypass and don't add to bad
+			    badtouch = 2;
+			}
+			else if(hit.collider != null && hit.collider.name == dbgmsg) { // dbgmsg = target name?
 				badtouch = 2; // this is good?
 				if(block_fb || practice){
 					PlayerPrefs.SetInt("numCorrect", PlayerPrefs.GetInt("numCorrect",0)+1);
-				}
-				
-				
+			   }
 			}
 			else{
 				badtouch = 1; // this probably means bad
