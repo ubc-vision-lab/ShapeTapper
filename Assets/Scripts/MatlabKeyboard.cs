@@ -148,7 +148,7 @@ public class MatlabKeyboard : Observer {
         }
     }
 
-    IEnumerator generateRecords()
+    IEnumerator GenerateRecords()
     {
         for(int i = 1; i <= 6; i++)
         {

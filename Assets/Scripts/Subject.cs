@@ -2,18 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Subject : MonoBehaviour {
+public class Subject {
 
     List<Observer> observers = new List<Observer>();
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
     public void Notify()
     {

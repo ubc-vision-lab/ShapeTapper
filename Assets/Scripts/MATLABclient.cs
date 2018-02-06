@@ -83,10 +83,12 @@ public class MATLABclient : MonoBehaviour {
         }
         else
         {
+            Debug.Log("Connect to matlab");
             this.ConnectToMatlab();
             this.subject = new Subject();
             mlClient = this;
             DontDestroyOnLoad(this);
+            Debug.Log("Connected");
         }
     }
     // Use this for initialization
@@ -97,7 +99,10 @@ public class MATLABclient : MonoBehaviour {
     void Update () {
         if (SocketReady && stream != null && stream.DataAvailable)
         {
-            subject.Notify();
+            if(subject != null)
+            {
+                subject.Notify();
+            }
         }
     }
     #endregion UnityEvents
@@ -154,8 +159,11 @@ public class MATLABclient : MonoBehaviour {
     #region UI
     private void SetConnectionStatus(string status, Color color)
     {
-        connectionText.text = "Server :" + status;
-        connectionText.color = color;
+        if(connectionText != null)
+        {
+            connectionText.text = "Server :" + status;
+            connectionText.color = color;
+        }
     }
 
     private void SetStatusConnected()
