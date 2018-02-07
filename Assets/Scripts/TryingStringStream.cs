@@ -42,24 +42,6 @@ public class TryingStringStream : Observer {
     private Vector3 first_touchpoint;
     private Vector3 touchpoint;
 
-    public int Absolute_trial_number
-    {
-        get
-        {
-            return _absolute_trial_number;
-        }
-
-        set
-        {
-            Assert.IsTrue(value >= 0, "Absolute trial number negative!");
-            // Assert.IsTrue(value < experimentConfig.Count, "Absolute trial number is larger than number of trials!");
-            _absolute_trial_number = value;
-        }
-    }
-
-    /**
-     * Trial configuration. Holds data pertaining to one trial in an experiment
-     **/
     public class TrialConfig
     {
         public enum ConfigIndex
@@ -94,7 +76,7 @@ public class TryingStringStream : Observer {
             string event3_name = trialConfig[(int)ConfigIndex.e3_image];
             if (event1_name != "")
             {
-                GameObject stimulus1 = (GameObject) Instantiate(assets.LoadAsset(event1_name));
+                GameObject stimulus1 = (GameObject)Instantiate(assets.LoadAsset(event1_name));
                 stimulus1.GetComponent<Renderer>().enabled = false;
                 stimuli.Add(ScaleStimulus(stimulus1,
                     float.Parse(trialConfig[(int)ConfigIndex.e1_rotation]),
@@ -139,7 +121,7 @@ public class TryingStringStream : Observer {
             Vector2 img_dim = new Vector2(stimulusRenderer.bounds.size.x, stimulusRenderer.bounds.size.y);
             float diag = img_dim.magnitude;
             float scaleFactor = diag / newImageDiag;
-            stimulus.transform.localScale = new Vector3(1/scaleFactor, 1/scaleFactor, 1);
+            stimulus.transform.localScale = new Vector3(1 / scaleFactor, 1 / scaleFactor, 1);
 
             float pixelOrthoRatio = Screen.height / 2f / Camera.main.orthographicSize;
             float border = 3 * Screen.dpi / pixelOrthoRatio / 8; // 3/8ths of an inch on the edges
@@ -153,12 +135,28 @@ public class TryingStringStream : Observer {
         }
     }
 
+    public int Absolute_trial_number
+    {
+        get
+        {
+            return _absolute_trial_number;
+        }
+
+        set
+        {
+            Assert.IsTrue(value >= 0, "Absolute trial number negative!");
+            // Assert.IsTrue(value < experimentConfig.Count, "Absolute trial number is larger than number of trials!");
+            _absolute_trial_number = value;
+        }
+    }
+
     #region UnityEvents
     // Use this for initialization
     void Start()
     {
         LetterQuery.enabled = false;
         PlayerPrefs.SetString("Data","");
+        PlayerPrefs.SetString("bad", "");
         PlayerPrefs.SetString("configName", "config_spider.txt");
         assetPath = Application.persistentDataPath + "/images";
         imageAssets = AssetBundle.LoadFromFile(assetPath);
@@ -306,6 +304,7 @@ public class TryingStringStream : Observer {
         }
         catch(System.Exception e)
         {
+            ExitBlock(9); // 9 = fileread error
             Debug.Log("Config file error: " + e);
             return null;
         }
@@ -395,23 +394,26 @@ public class TryingStringStream : Observer {
         charStream = MakeCharStream(targetLetter,target_index,2);
 
         // figure out if we're starting the bad set or still running new trials
-        if (PlayerPrefs.GetInt("badflag",0) == 1)
+        if (PlayerPrefs.GetInt("badflag", 0) == 1)
         {
             if(PlayerPrefs.GetString("bad", "") != "")
             {
                 badTrials = new List<string>(PlayerPrefs.GetString("bad", "").Split(';'));
                 // trialEvents =
                 int badtrial = Random.Range(0, badTrials.Count);
-                TrialConfig current_trial = new TrialConfig(badTrials[badtrial]);
+                current_trial_config = new TrialConfig(badTrials[badtrial]);
                 badTrials.Remove(badTrials[badtrial]);
                 string badTrialsArray = string.Join(";", badTrials.ToArray());
                 PlayerPrefs.SetString("bad", badTrialsArray);
-                trialEvents = current_trial.LoadStimuli(imageAssets);
+                trialEvents = current_trial_config.LoadStimuli(imageAssets);
+            }
+            else if (Absolute_trial_number >= experimentConfigList.Count) // we're done with all the bad flags trials! Exit the block.
+            {
+                ExitBlock(9); // finished experiment
             }
             else
             {
-                // we're done here! let's quit and thank the subject for participating
-                SceneManager.LoadScene("End");
+                ExitBlock(0); // finished block
             }
         }
         else // not in bad mode at the moment
@@ -432,7 +434,9 @@ public class TryingStringStream : Observer {
 
 
         // send the Eyelink Signal
-        MATLABclient.mlClient.SendEyelinkBegin();
+        string trialString = "(" + current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.block] + "," +
+            current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.trial] + ")";
+        MATLABclient.mlClient.SendEyelinkBegin(trialString);
         while (!eye_on_fixation) // wait for the eye to be on the fixation
         {
             yield return 0;
@@ -541,7 +545,7 @@ public class TryingStringStream : Observer {
     {
         Debug.Log(state.ToString());
         // turn off the fixation and home key, if they aren't already
-        if(int.Parse(experimentConfig[Absolute_trial_number].
+        if(int.Parse(current_trial_config.
             trialConfig[(int) TrialConfig.ConfigIndex.ask_for_target])>0) // if we are asking for the target
         {
             // not implemented yet
@@ -586,7 +590,7 @@ public class TryingStringStream : Observer {
         {
             MATLABclient.mlClient.SendRestart();
             FeedbackText.text = "Bad trial!";
-            AddBadTrial(experimentConfigList[Absolute_trial_number]);
+            AddBadTrial(string.Join(",",current_trial_config.trialConfig.ToArray()));
             // say it was a good trial
         }
         else
@@ -609,7 +613,7 @@ public class TryingStringStream : Observer {
         if(!good_trial)
         {
             Debug.Log("Adding bad trial to list of bad trials");
-            AddBadTrial(experimentConfigList[Absolute_trial_number]);
+            AddBadTrial(string.Join(",",current_trial_config.trialConfig.ToArray()));
         }
         Debug.Log(state.ToString());
         // unload the previous assets
@@ -617,22 +621,28 @@ public class TryingStringStream : Observer {
         {
             Object.Destroy(trialEvents[i]);
         }
-        List<string> previous_trial = experimentConfig[Absolute_trial_number].trialConfig;
+        List<string> previous_trial = current_trial_config.trialConfig;
 
         // move on to the next trial
-        Absolute_trial_number++;
-        PlayerPrefs.SetInt("line", PlayerPrefs.GetInt("line") + 1);
-        if (Absolute_trial_number > experimentConfigList.Count)
+        if(PlayerPrefs.GetInt("badflag", 0) == 0)
         {
-            PlayerPrefs.SetInt("bad", 1);
+            Absolute_trial_number++;
+            PlayerPrefs.SetInt("line", PlayerPrefs.GetInt("line") + 1);
+        }
+        // if we're at the end of a block or the end of the experiment, run the bad trials again
+        if (Absolute_trial_number >= experimentConfigList.Count) // end of experiment
+        {
+            // we don't have any more blocks;
+            PlayerPrefs.SetInt("badflag", 1); // run all the bad blocks
             Debug.Log("Rerunning bad trials");
         }
-        else {
+        else { // still more lines, check if it's end of block
             List<string> next_trial = experimentConfig[Absolute_trial_number].trialConfig;
             if(int.Parse(next_trial[(int) TrialConfig.ConfigIndex.block]) > int.Parse(previous_trial[(int)TrialConfig.ConfigIndex.block]))
             {
                 Debug.Log("Block Complete");
-                // SceneManager.LoadScene("Menu");
+                Debug.Log("Rerunning bad trials");
+                PlayerPrefs.SetInt("badflag", 1); // run all the bad blocks
             }
         }
         
@@ -651,8 +661,8 @@ public class TryingStringStream : Observer {
         }
         string delimiter = ";";
         string this_trial_data = "";
-        this_trial_data += current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.block] + delimiter;
-        this_trial_data += (!good_trial).ToString() + delimiter; // was it okay?
+        this_trial_data += current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.trial] + delimiter;
+        this_trial_data += good_trial.ToString() + delimiter; // was it okay?
         this_trial_data += targetLetter + delimiter; // what's the target
         this_trial_data += target_index.ToString() + delimiter; // which character position was it?
         this_trial_data += answer + delimiter; // what did the subject answer?
@@ -686,7 +696,15 @@ public class TryingStringStream : Observer {
         if(!badTrials.Contains(trialConfig))
         {
             badTrials += trialConfig;
+            PlayerPrefs.SetString("bad", badTrials);
         }
-        PlayerPrefs.SetString("bad", badTrials);
+    }
+
+    public void ExitBlock(int flag)
+    {
+        PlayerPrefs.SetInt("badflag", 0);
+        PlayerPrefs.SetInt("exit_flag", flag);
+        PlayerPrefs.SetInt("lastBlockLine", PlayerPrefs.GetInt("line", 0));
+        // SceneManager.LoadScene("");
     }
 }

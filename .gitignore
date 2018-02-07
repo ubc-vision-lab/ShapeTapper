@@ -33,5 +33,6 @@ sysinfo.txt
 *.apk
 *.unitypackage
 /AssetBundles/
-/Assets/Resources/Image\ Stimuli.zip*
+/Assets/Resources/Image\ Stimuli.
+/Assets/Resources/Image\ Stimuli.*
 /MATLAB/OTC_Code

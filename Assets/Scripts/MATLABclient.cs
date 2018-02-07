@@ -68,6 +68,11 @@ public class MATLABclient : MonoBehaviour {
         SendData("Eyelink");
     }
 
+    internal void SendEyelinkBegin(string trialNumber)
+    {
+        SendData("Eyelink" + trialNumber);
+    }
+
     internal void SendRestart()
     {
         SendData("Restart");
