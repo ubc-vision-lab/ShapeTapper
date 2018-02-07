@@ -19,6 +19,7 @@ function Start () {
 	UserIDSkin.fontSize = Screen.width/32;
 	blockMod = 1;
 	guiOn = true;
+	Debug.Log(PlayerPrefs.GetInt("line", 0));
 	
 	block = PlayerPrefs.GetInt("block", 0);
 	
@@ -101,7 +102,7 @@ function OnGUI(){
 				PlayerPrefs.SetInt("numCorrect",0);
 				PlayerPrefs.SetInt("line", PlayerPrefs.GetInt("lastBlockLine",0));
 				PlayerPrefs.SetInt("feedbackLine", PlayerPrefs.GetInt("lastBlockLine",0));
-				Application.LoadLevel(4);
+				Application.LoadLevel(5);
 			}
 			if(GUI.Button (Rect(Screen.width*.5-button_width/2,Screen.height*.5-button_height/2+button_height*1.12,button_width,button_height), "",helpSkin) && !popupFlag){
 				guiOn = false;

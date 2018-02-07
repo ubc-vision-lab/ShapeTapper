@@ -110,6 +110,19 @@ public class MATLABclient : MonoBehaviour {
             }
         }
     }
+
+    private void OnApplicationQuit()
+    {
+        MATLABclient.mlClient.SendExit();
+    }
+
+    private void OnDestroy()
+    {
+        if(stream != null && stream.CanWrite)
+        {
+            this.SendExit();
+        }
+    }
     #endregion UnityEvents
 
     #region Data Handling
@@ -166,7 +179,7 @@ public class MATLABclient : MonoBehaviour {
     {
         if(connectionText != null)
         {
-            connectionText.text = "Server :" + status;
+            connectionText.text = "Server: " + status;
             connectionText.color = color;
         }
     }

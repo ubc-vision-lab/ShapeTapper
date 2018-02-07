@@ -76,7 +76,7 @@ public class TryingStringStream : Observer {
             string event3_name = trialConfig[(int)ConfigIndex.e3_image];
             if (event1_name != "")
             {
-                GameObject stimulus1 = (GameObject)Instantiate(assets.LoadAsset(event1_name));
+                GameObject stimulus1 = Instantiate<GameObject>(assets.LoadAsset<GameObject>(event1_name));
                 stimulus1.GetComponent<Renderer>().enabled = false;
                 stimuli.Add(ScaleStimulus(stimulus1,
                     float.Parse(trialConfig[(int)ConfigIndex.e1_rotation]),
@@ -86,7 +86,7 @@ public class TryingStringStream : Observer {
             }
             if (event2_name != "")
             {
-                GameObject stimulus2 = (GameObject)Instantiate(assets.LoadAsset(event2_name));
+                GameObject stimulus2 = Instantiate<GameObject>(assets.LoadAsset<GameObject>(event2_name));
                 stimulus2.GetComponent<Renderer>().enabled = false;
                 stimuli.Add(ScaleStimulus(stimulus2,
                     float.Parse(trialConfig[(int)ConfigIndex.e2_rotation]),
@@ -96,7 +96,7 @@ public class TryingStringStream : Observer {
             }
             if (event3_name != "")
             {
-                GameObject stimulus3 = (GameObject)Instantiate(assets.LoadAsset(event3_name));
+                GameObject stimulus3 = Instantiate<GameObject>(assets.LoadAsset<GameObject>(event3_name));
                 stimulus3.GetComponent<Renderer>().enabled = false;
                 stimuli.Add(ScaleStimulus(stimulus3,
                     float.Parse(trialConfig[(int)ConfigIndex.e3_rotation]),
@@ -155,16 +155,15 @@ public class TryingStringStream : Observer {
     void Start()
     {
         LetterQuery.enabled = false;
-        PlayerPrefs.SetString("Data","");
-        PlayerPrefs.SetString("bad", "");
-        PlayerPrefs.SetString("configName", "config_spider.txt");
         assetPath = Application.persistentDataPath + "/images";
         imageAssets = AssetBundle.LoadFromFile(assetPath);
-        PlayerPrefs.SetInt("line", 0);
         Absolute_trial_number = PlayerPrefs.GetInt("line", 0);
         rerunning_bad_trials = PlayerPrefs.GetInt("badflag", 0) > 0;
         experimentConfigFilename = Application.persistentDataPath + "/" + PlayerPrefs.GetString("configName", "config_spider.txt");
         Debug.Log("ReadConfigFile");
+        Debug.Log("Trial Number: " + Absolute_trial_number.ToString());
+        Debug.Log(PlayerPrefs.GetString("bad", ""));
+        Debug.Log(PlayerPrefs.GetInt("badflag", 0));
         experimentConfigList = new List<string>();
         experimentConfig = ReadConfigFile();
         Debug.Log("LoadAsset");
@@ -183,8 +182,7 @@ public class TryingStringStream : Observer {
     void Update () {
         if(Input.GetKeyDown(KeyCode.Escape))
         {
-            imageAssets.Unload(true);
-            Application.Quit();
+            SceneManager.LoadScene("start");
         }
         if (state >= State.InitTrial)
         {
@@ -213,6 +211,13 @@ public class TryingStringStream : Observer {
     {
         MATLABclient.mlClient.SendExit();
         // cleanup stuff goes here
+    }
+
+    private void OnDestroy()
+    {
+        imageAssets.Unload(true);
+        PlayerPrefs.SetInt("endNum", PlayerPrefs.GetInt("line", 0));
+        MATLABclient.mlClient.subject.RemoveObserver(this);
     }
 
     private void FixedUpdate()
@@ -657,9 +662,9 @@ public class TryingStringStream : Observer {
         string data = PlayerPrefs.GetString("Data", "");
         if(!data.Equals(""))
         {
-            data += "|"; // trial delimiter ";"
+            data += ";"; // trial delimiter ";"
         }
-        string delimiter = ";";
+        string delimiter = "|";
         string this_trial_data = "";
         this_trial_data += current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.trial] + delimiter;
         this_trial_data += good_trial.ToString() + delimiter; // was it okay?
@@ -705,6 +710,6 @@ public class TryingStringStream : Observer {
         PlayerPrefs.SetInt("badflag", 0);
         PlayerPrefs.SetInt("exit_flag", flag);
         PlayerPrefs.SetInt("lastBlockLine", PlayerPrefs.GetInt("line", 0));
-        // SceneManager.LoadScene("");
+        SceneManager.LoadScene("End");
     }
 }
