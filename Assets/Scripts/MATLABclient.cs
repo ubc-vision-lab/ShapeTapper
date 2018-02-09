@@ -55,6 +55,7 @@ public class MATLABclient : MonoBehaviour {
             reader = new StreamReader(stream);
             SocketReady = true;
             SetStatusConnected();
+            SendData(PlayerPrefs.GetString("UserID", ""));
             Debug.Log("MATLABclient started.");
         }
         catch(Exception e)

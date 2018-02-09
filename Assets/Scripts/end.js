@@ -73,7 +73,7 @@ function ShortPause(){
 	var fileName = Application.persistentDataPath + "/data_files/"+PlayerPrefs.GetString("UserID","dataFile")+"_" + (block+1) + ".txt";
 
 	var sr : StreamWriter = new StreamWriter(fileName);
-	var str2write : String = "trial#;good_trial;target;place;answer;onset;lift;1sttouch;1sttchpt;lasttouch;lasttchpt";
+	var str2write : String = "trial#\tgood_trial\ttarget\tplace\tanswer\tonset\tlift\t1sttouch\t1sttchptx\t1sttchpty\tlasttouch\tlasttchptx\tlasttchpty";
 	sr.WriteLine(str2write);
 	
 	var Data = PlayerPrefs.GetString("Data","").Split(";"[0]);

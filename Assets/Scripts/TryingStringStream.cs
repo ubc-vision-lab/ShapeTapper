@@ -166,6 +166,8 @@ public class TryingStringStream : Observer {
         Debug.Log(PlayerPrefs.GetInt("badflag", 0));
         experimentConfigList = new List<string>();
         experimentConfig = ReadConfigFile();
+        PlayerPrefs.SetInt("block_fb", 1);
+        PlayerPrefs.SetInt("block_percentage", 0);
         Debug.Log("LoadAsset");
         fingerStart = (GameObject)Instantiate(imageAssets.LoadAsset("solo12"));
         fingerStart.transform.position = new Vector3(0, -1f);
@@ -252,7 +254,7 @@ public class TryingStringStream : Observer {
     {
         Assert.IsTrue(target_index >= 0);
         string[] generatedString = new string[target_index+14];
-        string previous_chars = new string(' ',repeat_distance); // "Empty" string
+        Queue<string> previous_chars = new Queue<string>(repeat_distance);
         for (int i = 0; i < generatedString.Length; i++)
         {
             string tmp;
@@ -268,7 +270,11 @@ public class TryingStringStream : Observer {
                     tmp = Random.Range(0, 10).ToString();
                 }
             }
-            previous_chars.Insert(i % repeat_distance, tmp); // last two characters
+            if(previous_chars.Count >= repeat_distance)
+            {
+                previous_chars.Dequeue();
+            }
+            previous_chars.Enqueue(tmp); // last two characters
             generatedString[i] = tmp;
         }
         return generatedString;
@@ -538,11 +544,10 @@ public class TryingStringStream : Observer {
         {
             yield return 0;
         }
-        //Debug.Log("Changing to ask for letter");
-        //state = State.AskForLetter;
-        state = State.AskForLetter;
+        
         Debug.Log("Turning off renderer for shape");
         trialEvents[1].GetComponent<Renderer>().enabled = false;
+        state = State.AskForLetter;
         NextState();
     }
 
@@ -664,7 +669,7 @@ public class TryingStringStream : Observer {
         {
             data += ";"; // trial delimiter ";"
         }
-        string delimiter = "|";
+        string delimiter = "\t";
         string this_trial_data = "";
         this_trial_data += current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.trial] + delimiter;
         this_trial_data += good_trial.ToString() + delimiter; // was it okay?
@@ -674,9 +679,11 @@ public class TryingStringStream : Observer {
         this_trial_data += image_presentation_time.ToString() + delimiter; // time for presentation of first event
         this_trial_data += finger_lift_time.ToString() + delimiter; // time for finger to lift from presentation of first event
         this_trial_data += finger_first_touch_time.ToString() + delimiter;
-        this_trial_data += first_touchpoint.ToString() + delimiter;
+        this_trial_data += first_touchpoint.x.ToString() + delimiter;
+        this_trial_data += first_touchpoint.y.ToString() + delimiter;
         this_trial_data += finger_touch_time.ToString() + delimiter; // when did the finger land on the screen again
-        this_trial_data += touchpoint.ToString();
+        this_trial_data += touchpoint.x.ToString() + delimiter;
+        this_trial_data += touchpoint.y.ToString();
 
         data += this_trial_data; // in debug mode this makes it easier to read;
 

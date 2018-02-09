@@ -7,6 +7,14 @@ pause(1);
 
 fprintf('client connected\n');
 
+if(UnityPort.BytesAvailable)
+    greeting = fscanf(UnityPort);
+    greeting = strtrim(greeting);
+    disp(greeting);
+else
+    
+end
+
 run_experiment = true;
 network_pause = 0.002;
 current_state = 1; % state machine behaviour
