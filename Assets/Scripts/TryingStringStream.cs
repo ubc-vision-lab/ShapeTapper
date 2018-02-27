@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -37,7 +38,6 @@ public class TryingStringStream : Observer {
     private bool eye_on_fixation = true;
     private bool good_trial = true;
     private bool stream_complete = false;
-    private float trial_onset_time;
     private string[] charStream;
     private Vector3 first_touchpoint;
     private Vector3 touchpoint;
@@ -110,7 +110,6 @@ public class TryingStringStream : Observer {
         public GameObject ScaleStimulus(GameObject stimulus, float rotation, float scaling, float x_pos, float y_pos)
         {
             Renderer stimulusRenderer = stimulus.GetComponent<Renderer>();
-            Vector2 position = new Vector2(x_pos, y_pos);
             stimulusRenderer.enabled = false;
             float screenHeight = 2f * Camera.main.orthographicSize;
             float screenWidth = screenHeight * Camera.main.aspect;
@@ -125,8 +124,8 @@ public class TryingStringStream : Observer {
 
             float pixelOrthoRatio = Screen.height / 2f / Camera.main.orthographicSize;
             float border = 3 * Screen.dpi / pixelOrthoRatio / 8; // 3/8ths of an inch on the edges
-            float margin_x = screenWidth - newImageDiag - border;
-            float margin_y = screenHeight - newImageDiag - border;
+            float margin_x = screenWidth; // screenWidth - newImageDiag - border;
+            float margin_y = screenHeight; // - newImageDiag - border;
             // stimulus.transform.position = Vector3.Scale(position, new Vector3(margin_x / 100f, margin_y / 100f)); // this is wrong
             stimulus.transform.position = new Vector3(x_pos / 100f * margin_x - (margin_x / 2), y_pos / 100f * margin_y - (margin_y / 2));
 
@@ -169,9 +168,9 @@ public class TryingStringStream : Observer {
         PlayerPrefs.SetInt("block_fb", 1);
         PlayerPrefs.SetInt("block_percentage", 0);
         Debug.Log("LoadAsset");
-        fingerStart = (GameObject)Instantiate(imageAssets.LoadAsset("solo12"));
+        fingerStart = (GameObject)Instantiate(imageAssets.LoadAsset("home_button"));
         fingerStart.transform.position = new Vector3(0, -1f);
-        fingerStart.transform.localScale = new Vector3(0.2f, 0.2f);
+        fingerStart.transform.localScale = new Vector3(0.05f, 0.05f);
         MATLABclient.mlClient.subject.AddObserver(this);
 
         // fetch current experiment state
@@ -197,12 +196,12 @@ public class TryingStringStream : Observer {
                 if(first_touchpoint.Equals(Vector3.zero)) // first landing
                 {
                     first_touchpoint = Input.mousePosition;
-                    finger_first_touch_time = Time.time;
+                    finger_first_touch_time = Time.time - trial_start_time;
                 }
                 else // save the latest touchpoint
                 {
                     touchpoint = Input.mousePosition;
-                    finger_touch_time = Time.time;
+                    finger_touch_time = Time.time - trial_start_time;
                 }
             }
             // record the touch here
@@ -233,6 +232,7 @@ public class TryingStringStream : Observer {
     private const string letters = "KNVXYZ";
     private string targetLetter = " ";
     private int target_index;
+    private float letter_time;
 
     IEnumerator StreamChars(string[] charStream, float displayDuration, float displayInterval)
     {
@@ -240,10 +240,15 @@ public class TryingStringStream : Observer {
         {
             // display the letter at that position
             this.charStreamText.text = character;
+            this.charStreamText.enabled = true;
             float displayStart = Time.time;
+            if (character.Equals(targetLetter))
+            {
+                letter_time = displayStart - trial_start_time;
+            }
             yield return new WaitForSeconds(displayDuration);
             // turn off the letter
-            this.charStreamText.text = "";
+            this.charStreamText.enabled = false;
             float actualDuration = Time.time - displayStart;
             yield return new WaitForSeconds(displayInterval - actualDuration); // use actualDuration to maintain interval length as much as possible
         }
@@ -334,8 +339,12 @@ public class TryingStringStream : Observer {
         }
         else if(response.Contains("Restart"))
         {
-            eye_on_fixation = false;
-            good_trial = false;
+            if(state >= State.InitTrial && state < State.AskForLetter)
+                // once you ask for the letter don't check the eye anymore
+            {
+                eye_on_fixation = false;
+                good_trial = false;
+            }
         }
         Debug.Log(response);
     }
@@ -387,7 +396,11 @@ public class TryingStringStream : Observer {
 
         // reset trial variables
         good_trial = true;
-        eye_on_fixation = false;
+        if (MATLABclient.mlClient.SocketReady)
+        {
+            eye_on_fixation = false;
+        }
+        else eye_on_fixation = true;
         stream_complete = false;
         charStreamText.text = "+";
 
@@ -435,6 +448,7 @@ public class TryingStringStream : Observer {
 
         // re-display home key, turn off images
         fingerStart.GetComponent<Renderer>().enabled = true;
+        this.charStreamText.enabled = true;
 
         Debug.Log("Initialization complete");
         // wait for finger to be on the start key
@@ -448,6 +462,7 @@ public class TryingStringStream : Observer {
         string trialString = "(" + current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.block] + "," +
             current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.trial] + ")";
         MATLABclient.mlClient.SendEyelinkBegin(trialString);
+        
         while (!eye_on_fixation) // wait for the eye to be on the fixation
         {
             yield return 0;
@@ -480,6 +495,7 @@ public class TryingStringStream : Observer {
                 {
                     Debug.Log("Finger not on start!");
                 }
+                MATLABclient.mlClient.SendRestart();
                 good_trial = false;
                 break;
             }
@@ -505,7 +521,7 @@ public class TryingStringStream : Observer {
     private IEnumerator Image()
     {
         trialEvents[0].GetComponent<Renderer>().enabled = true;
-        image_presentation_time = Time.time;
+        image_presentation_time = Time.time - trial_start_time;
         float startTime = Time.time;
         // if the stream finishes before the person lifts their finger, that's a bad trial
         while(!stream_complete)
@@ -520,7 +536,7 @@ public class TryingStringStream : Observer {
             else if(!fingerOnStart) // let's just say that if the finger moves away from the start,
                 // that they're moving towards the stimulus
             {
-                finger_lift_time = Time.time;
+                finger_lift_time = Time.time - trial_start_time;
                 state = State.Lifted;
                 break;
             }
@@ -528,6 +544,7 @@ public class TryingStringStream : Observer {
         }
         if(state == State.Image) // they kept their eye and finger on initial position the whole time
         {
+            MATLABclient.mlClient.SendTrialEnd();
             state = State.Feedback;
             good_trial = false;
         }
@@ -537,6 +554,8 @@ public class TryingStringStream : Observer {
     private IEnumerator Lifted()
     {
         Debug.Log(state.ToString());
+        yield return new WaitForSeconds(0.1f + 0.2f * Random.Range(0, 1));
+
         fingerStart.GetComponent<Renderer>().enabled = false;
         trialEvents[0].GetComponent<Renderer>().enabled = false;
         trialEvents[1].GetComponent<Renderer>().enabled = true;
@@ -547,6 +566,8 @@ public class TryingStringStream : Observer {
         
         Debug.Log("Turning off renderer for shape");
         trialEvents[1].GetComponent<Renderer>().enabled = false;
+        yield return new WaitForSeconds(0.5f);
+        MATLABclient.mlClient.SendTrialEnd();
         state = State.AskForLetter;
         NextState();
     }
@@ -561,6 +582,8 @@ public class TryingStringStream : Observer {
             // not implemented yet
             answer = "";
             LetterQuery.enabled = true; // this shows the prompt for the letter
+            LetterAnswer.Select();
+            LetterAnswer.ActivateInputField();
             do
             {
                 if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) // waiting for subject to press enter
@@ -596,16 +619,14 @@ public class TryingStringStream : Observer {
             trialEvents[i].GetComponent<Renderer>().enabled = false;
         }
         // use the boolean variables to see if there's been anything bad happening
-        if (!good_trial || touchpoint == Vector3.zero)
+        if (!good_trial || first_touchpoint == Vector3.zero)
         {
-            MATLABclient.mlClient.SendRestart();
             FeedbackText.text = "Bad trial!";
             AddBadTrial(string.Join(",",current_trial_config.trialConfig.ToArray()));
             // say it was a good trial
         }
         else
         {
-            MATLABclient.mlClient.SendTrialEnd();
             FeedbackText.text = "Good trial!";
             // something something good job!!
         }
@@ -669,12 +690,14 @@ public class TryingStringStream : Observer {
         {
             data += ";"; // trial delimiter ";"
         }
+        good_trial = good_trial && !first_touchpoint.Equals(Vector3.zero);
         string delimiter = "\t";
         string this_trial_data = "";
         this_trial_data += current_trial_config.trialConfig[(int)TrialConfig.ConfigIndex.trial] + delimiter;
         this_trial_data += good_trial.ToString() + delimiter; // was it okay?
         this_trial_data += targetLetter + delimiter; // what's the target
         this_trial_data += target_index.ToString() + delimiter; // which character position was it?
+        this_trial_data += letter_time.ToString() + delimiter;
         this_trial_data += answer + delimiter; // what did the subject answer?
         this_trial_data += image_presentation_time.ToString() + delimiter; // time for presentation of first event
         this_trial_data += finger_lift_time.ToString() + delimiter; // time for finger to lift from presentation of first event
@@ -683,7 +706,13 @@ public class TryingStringStream : Observer {
         this_trial_data += first_touchpoint.y.ToString() + delimiter;
         this_trial_data += finger_touch_time.ToString() + delimiter; // when did the finger land on the screen again
         this_trial_data += touchpoint.x.ToString() + delimiter;
-        this_trial_data += touchpoint.y.ToString();
+        this_trial_data += touchpoint.y.ToString() + delimiter;
+        foreach(GameObject trialEvent in trialEvents)
+        {
+            Vector3 image_position = Camera.main.WorldToScreenPoint(trialEvent.transform.localPosition);
+            this_trial_data += image_position.x.ToString() + delimiter;
+            this_trial_data += image_position.y.ToString() + delimiter;
+        }
 
         data += this_trial_data; // in debug mode this makes it easier to read;
 
