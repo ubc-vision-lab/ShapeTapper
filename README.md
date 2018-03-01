@@ -37,13 +37,14 @@ Make sure the following equipment is set up and started:
 1. Start the MATLAB script first -- `C:\Users\UBC\Documents\MATLAB\Rob_Test\network_listening_test.m`
 1. Start ShapeSpider `C:\Users\UBC\Desktop\ShapeSpider\ShapeSpider_RC4.exe`
 1. MATLAB will be ask for the User ID.
-  - Unity will attempt to send a userID once it connects. However, you will likely need to reset the ShapeSpider program so that it uses your config file(bottom left of ShapeSpider menu, click 10 times). Please input the UserID listed on the bottom right of the screen into the MATLAB prompt.
+    - Unity will attempt to send a userID once it connects. However, you will likely need to reset the ShapeSpider program so that it uses your config file(bottom left of ShapeSpider menu, click 10 times). Please input the UserID listed on the bottom right of the screen into the MATLAB prompt.
 1. MATLAB will ask the directory where you want to store the data. MATLAB will generate a directory with the UserID as the name once you pick.
-  - If you want to run the same subject again, please just choose the same directory you initially picked, or else it will create a second directory inside (e.g. `Documents\ABCD\ABCD` rather than `Documents\ABCD`, which is what you'd want)
+    - If you want to run the same subject again, please just choose the same directory you initially picked, or else it will create a second directory inside (e.g. `Documents\ABCD\ABCD` rather than `Documents\ABCD`, which is what you'd want)
 1. Calibrate Eyelink
-  2. The screen will give you the fixation + 1-9 + shapes screen. Use that time to make sure Eyelink is working and the sensitivity and focus are all set up. Press `SPACE` once that's done.
-  2. On the calibration/validation screen, either use the Eyelink Computer's mouse or the keyboard attached to the Dell to control the calibration process.
-  2. Once validation is complete, press `Esc` twice to get to the fixation + 1-9 + shapes screen again. This time, a cursor will approximately follow the eye movements of the participant. Check to make sure all positions (1-9, fixation) are okay. Tell the participant to look at the fixation, then press space bar. Please make sure the participant looks at the fixation as that's how we verify that they are looking at the fixation during the experiment.
+   1. The screen will give you the fixation + 1-9 + shapes screen. Use that time to make sure Eyelink is working and the sensitivity and focus are all set up. Press `SPACE` once that's done.
+   1. On the calibration/validation screen, either use the Eyelink Computer's mouse or the keyboard attached to the Dell to control the calibration process.
+   1. Once validation is complete, press `Esc` twice to get to the fixation + 1-9 + shapes screen again. This time, a cursor will approximately follow the eye movements of the participant. Check to make sure all positions (1-9, fixation) are okay. Tell the participant to look at the fixation, then press space bar. Please make sure the participant looks at the fixation as that's how we verify that they are looking at the fixation during the experiment.
+   
 1. Wait for the Optotrack to initialize -- it will beep a few times, and Unity will say when Optotrack is ready.
 1. Switch focus back to ShapeSpider (click on taskbar, `alt+tab`, etc.). Run the program
 
