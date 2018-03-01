@@ -124,9 +124,8 @@ public class TryingStringStream : Observer {
 
             float pixelOrthoRatio = Screen.height / 2f / Camera.main.orthographicSize;
             float border = 3 * Screen.dpi / pixelOrthoRatio / 8; // 3/8ths of an inch on the edges
-            float margin_x = screenWidth; // screenWidth - newImageDiag - border;
-            float margin_y = screenHeight; // - newImageDiag - border;
-            // stimulus.transform.position = Vector3.Scale(position, new Vector3(margin_x / 100f, margin_y / 100f)); // this is wrong
+            float margin_x = screenWidth - newImageDiag - border;
+            float margin_y = screenHeight - newImageDiag - border;
             stimulus.transform.position = new Vector3(x_pos / 100f * margin_x - (margin_x / 2), y_pos / 100f * margin_y - (margin_y / 2));
 
             stimulus.transform.eulerAngles = new Vector3(0, 0, rotation);
@@ -165,7 +164,7 @@ public class TryingStringStream : Observer {
         Debug.Log(PlayerPrefs.GetInt("badflag", 0));
         experimentConfigList = new List<string>();
         experimentConfig = ReadConfigFile();
-        PlayerPrefs.SetInt("block_fb", 1);
+        PlayerPrefs.SetInt("block_fb", 0);
         PlayerPrefs.SetInt("block_percentage", 0);
         Debug.Log("LoadAsset");
         fingerStart = (GameObject)Instantiate(imageAssets.LoadAsset("home_button"));
@@ -554,7 +553,6 @@ public class TryingStringStream : Observer {
     private IEnumerator Lifted()
     {
         Debug.Log(state.ToString());
-        yield return new WaitForSeconds(0.1f + 0.2f * Random.Range(0, 1));
 
         fingerStart.GetComponent<Renderer>().enabled = false;
         trialEvents[0].GetComponent<Renderer>().enabled = false;
@@ -566,8 +564,8 @@ public class TryingStringStream : Observer {
         
         Debug.Log("Turning off renderer for shape");
         trialEvents[1].GetComponent<Renderer>().enabled = false;
-        yield return new WaitForSeconds(0.5f);
         MATLABclient.mlClient.SendTrialEnd();
+        yield return new WaitForSeconds(0.5f);
         state = State.AskForLetter;
         NextState();
     }
