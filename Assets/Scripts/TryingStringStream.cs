@@ -169,7 +169,14 @@ public class TryingStringStream : Observer {
         Debug.Log("LoadAsset");
         fingerStart = (GameObject)Instantiate(imageAssets.LoadAsset("home_button"));
         fingerStart.transform.position = new Vector3(0, -1f);
-        fingerStart.transform.localScale = new Vector3(0.05f, 0.05f);
+        Vector3 home_button_size = Vector3.Scale(fingerStart.GetComponent<Renderer>().bounds.size,new Vector3(Screen.height/Camera.main.orthographicSize/2, Screen.height / Camera.main.orthographicSize / 2));
+        Debug.Log(fingerStart.GetComponent<Renderer>().bounds.size);
+        Debug.Log(home_button_size);
+        Vector3 home_button_inverse = new Vector3(1 / home_button_size.x, 1 / home_button_size.y);
+        Vector3 scalingFactor = new Vector3(0.6f * Screen.dpi / 2.54f, 0.6f * Screen.dpi / 2.54f);
+        scalingFactor.Scale(home_button_inverse);
+        fingerStart.transform.localScale = scalingFactor;
+        Debug.Log(fingerStart.GetComponent<Renderer>().bounds.size);
         MATLABclient.mlClient.subject.AddObserver(this);
 
         // fetch current experiment state
