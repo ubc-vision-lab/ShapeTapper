@@ -1,49 +1,51 @@
-function network_listening_test(iniOpto)
-instrreset 
-iniOpto = 0;
+function network_listening_test(opto_initialized)
+instrreset
+opto_initialized = 0; 
+fixation_threshold = 75;
 olddir = pwd;
-
-%CONSTANTS
+ 
+%CONSTANTS  
 MISSINGDATACUTOFFVALUE = -3.6972e28; %an 'anything less than' cutoff value for missing data, 
 OPTO = '_opto_';
 TXT = '.txt';
-DAT = '.dat';
+DAT = '.dat'; 
 FNRAWDATA = 'RawNDIDatFiles';
 FNOTCREORG = 'OTCReorganized';
-
+ 
 % Unity connection setup
 UnityPort = tcpip('localhost', 56789, 'NetworkRole', 'Server');
 set(UnityPort, 'InputBufferSize', 900000);
 
-fprintf('waiting for client');
+fprintf('Waiting for client. Please start ShapeSpider now.');
 fopen(UnityPort);
 pause(1);
 fprintf('client connected');
-WaitSecs(0.010);
+WaitSecs(0.01);
 if(UnityPort.BytesAvailable)
     uuid = fscanf(UnityPort);
-    uuid = strtrim(uuid);
+     uuid = strtrim(uuid);
 else
     uuid = 'demo';
 end
 
-KbName('UnifyKeyNames');  
+KbName('UnifyKeyNames');
 escKEY = KbName('escape');
 spacekey = KbName('space');
 pkey = KbName('p');
-cKey = KbName('c');
-Screen('Preference', 'SkipSyncTests', 2)
+F3Key = KbName('F3');
+F12Key = KbName('F12');
+sca; % same as Screen('CloseAll');
+% Screen('Preference', 'SkipSyncTests', 2)
 
 % prompt for UID
+% this may as well be a function
 prompt = {'Enter subject ID:'}; %,'Enter configuration file name:'};
-
 dlg_title = 'Subject ID';
-config_name = 'config.txt';
 num_lines= 1;
-def     = {uuid};%,config_name};
+def     = {uuid};
 answer  = inputdlg(prompt,dlg_title,num_lines,def);
 
-%if the user clicks 'cancel', 'answer' is empty. Quite the program.
+%if the user clicks 'cancel', 'answer' is empty. Quit the program.
 if isempty(answer)
     return;
 end
@@ -78,8 +80,8 @@ if EyelinkInit()~= 1 %
 end
 
 screenNumber=max(Screen('Screens'));
-[window, wRect]=Screen('OpenWindow', screenNumber, 0,[],[],2);
-Screen(window,'BlendFunction',GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+[window, wRect]=Screen('OpenWindow', screenNumber, 0,[],[],2); % main screen, black, double buffer
+Screen(window,'BlendFunction',GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); % to set up calibration image
 img = imread('C:\Users\UBC\Desktop\ShapeSpider\cali_all.png'); % calibration image
 texture1 = Screen('MakeTexture', window, img);
 
@@ -87,8 +89,8 @@ el=EyelinkInitDefaults(window);
 
 Eyelink('Command', 'link_sample_data = LEFT,RIGHT,GAZE,AREA');
 
-[v vs]=Eyelink('GetTrackerVersion');
-edfFile=strcat(answer{1},'.edf');
+[v vs]=Eyelink('GetTrackerVersion'); % is this even needed?
+edfFile=strcat(answer{1},'.edf'); % name the edf file -- TODO: check if one already exists and make a second one?
 Eyelink('Openfile', edfFile);
 eye_used = el.RIGHT_EYE;
 
@@ -187,7 +189,7 @@ Eyelink('StopRecording');
 sca
 
 % eyelink works, let's set up the Optotrack stuff here.
-if iniOpto==0
+if opto_initialized==0
     optotrak_init
 end
 
@@ -197,7 +199,7 @@ end
 % realistically the values are probably known beforehand, maybe just set
 % those as defaults so experimenter can "enter" through
 %[nMarkers, smpRt, smpTime, nMarkersPerPort] = OTCParamsHandler;
-nMarkers=2; smpRt=200; smpTime=2; nMarkersPerPort=[nMarkers 0 0 0];
+nMarkers=4; smpRt=200; smpTime=2; nMarkersPerPort=[nMarkers 0 0 0];
 
 %setup the strober specific information (number of markers per
 %port)...NOTE, this function requires a value for a 4th port, but since the
@@ -235,28 +237,29 @@ WaitSecs(2); %wait times recommended in API
 
 % optotrack set should be finished before the loop
 
-fixation_threshold = 1000;
 run_experiment = true;
 current_state = 1; % state machine behaviour
 % 1 = waiting for unity (finger on homebutton)
 % 2 = eyetracking, waiting for optotrack signal
-% 3 = eyetracking + optotrack, waiting for end/exit
+% 3 = eyetracking + optotrack, waiting for end/exit  
 % for 2 and 3, when eyetracking sees that eye out of range, it will
 % stop recording for all devices and send the 'Restart' signal to Unity
 time_between_eyelink_samples = 0.001;
 countbad = 0; % count the number of times Eyelink has missed an eye;
-error_threshold = 10; % if Eyelink misreads this many times (in a row), then quit
-
+error_threshold = 100; % if Eyelink misreads this many times (in a row), then quit
+current_trial_name = '';
+disp('Optotrack ready, switch to ShapeSpider now.');
+optotrack_trial_mapping = [];
 trial=1; %trial counter
 while(run_experiment)
     % check is server connection still there
     [keyIsDown,secs,keyCode] = KbCheck;
     if keyCode(escKEY)
-        break;
-    elseif keyCode(cKey)
+        current_state = 1;
+    elseif keyCode(F3Key)
         fixation_pos = VisionLabEyelinkSetup();
     end
-    switch current_state
+    switch current_state 
         case 1 % waiting for Unity to signal start
             %spool data from buffer to file
             countbad = 0;
@@ -266,9 +269,28 @@ while(run_experiment)
                 unityMessage = fscanf(UnityPort);
                 unityMessage = strtrim(unityMessage);
                 if ~isempty(strfind(unityMessage, 'Eyelink'))
+                    block_txt = strsplit(unityMessage);
+                    block_txt = block_txt{end};
+                    current_trial_name = strsplit(unityMessage);
+                    current_trial_name = current_trial_name(2);
                     % fetch the trial number also?
                     Eyelink('StartRecording'); % start recording
+                    eyetrack_check = 0;
+                    eyetrack_threshold = 1000;
                     while(~eyeOnFixation(fixation_pos, fixation_threshold, el, eye_used))
+                        eyetrack_check = eyetrack_check + 1;
+                        if(eyetrack_check > eyetrack_threshold)
+                            fprintf(UnityPort,'Restart');
+                            break;
+                        end
+                        error = Eyelink('CheckRecording');
+                        if(error~=0)
+                            disp('Eyelink Error!');
+                            % attempt to restart Eyelink recording
+                            Eyelink('StopRecording');
+                            WaitSecs(0.005);
+                            Eyelink('StartRecording');
+                        end
                         WaitSecs(0.005);
                     end
                     disp('Sending Fixation');
@@ -296,21 +318,14 @@ while(run_experiment)
                     if strcmp(unityMessage,'Optotrack')
                         
                         %determine the trial number text
-                        if trial > 99 && trial < 1000
-                            txtTrial = [int2str(trial)];
-                        elseif trial > 9 && trial < 100
-                            txtTrial = ['0' int2str(trial)];
-                        elseif trial > 0 && trial < 10
-                            txtTrial = ['00' int2str(trial)];
-                        else
-                            txtTrial = '000';
-                        end
-
+                        txtTrial = [num2str(trial, '%03d') '_']; % pad left side with zeros
+                        
+                        optotrack_trial_mapping = [optotrack_trial_mapping; [int2str(trial) current_trial_name]];
                         %navigate to the NDI Raw data file
                         cd([expDir '\' answer{1} '\' FNRAWDATA]);
 
                         %The NDI dat file name for the current trial
-                        NDIFName = [answer{1} OPTO txtTrial DAT];
+                        NDIFName = [answer{1} OPTO txtTrial block_txt DAT];
 
                         if trial==1
                             %re-initialize the reorganized data
@@ -382,9 +397,9 @@ while(run_experiment)
                     fprintf(UnityPort,'Restart');
                     disp('Eye issue');
                     current_state = 4;
-                end
+                  end
             else
-                countbad = 0;
+                countbad = 0;  
             end
             WaitSecs(time_between_eyelink_samples);
         case 4 % Completion of trial
@@ -400,7 +415,7 @@ while(run_experiment)
                 if puSpoolStatus ~= 0
                     disp('Spooling Error');
                     break;
-                end 
+                end
             end
             disp('spooling complete. deactivating markers');
             
@@ -435,11 +450,11 @@ while(run_experiment)
             cd([expDir '\' answer{1} '\' FNOTCREORG]);
 
             %ALWAYS STORE A RAW DATA SET
-            disp(['Saving file: ' answer{1} OPTO txtTrial TXT '...'])
-            fid = fopen([answer{1} OPTO txtTrial TXT], 'w');
+            disp(['Saving file: ' answer{1} OPTO txtTrial block_txt TXT '...'])
+            fid = fopen([answer{1} OPTO txtTrial block_txt TXT], 'w');
             %fprintf(fid, hdr);
             fclose(fid);
-            dlmwrite([answer{1} OPTO txtTrial TXT],dataReorg,'-append','delimiter',...
+            dlmwrite([answer{1} OPTO txtTrial block_txt TXT],dataReorg,'-append','delimiter',...
                 '\t','newline','pc','precision',12);
             disp('Success!')
 
@@ -447,6 +462,8 @@ while(run_experiment)
             trial=trial+1; %advance to the next trial
     end
 end
+
+disp(optotrack_trial_mapping);
 
 WaitSecs(0.1);
 Eyelink('CloseFile');
@@ -457,7 +474,7 @@ try
     if status > 0
         fprintf('ReceiveFile status %d\n', status);
     end
-    if 2==exist(edfFile, 'file')
+    if 2==exist (edfFile, 'file')
         fprintf('Data file ''%s'' can be found in ''%s''\n', edfFile, pwd );
     end
 catch

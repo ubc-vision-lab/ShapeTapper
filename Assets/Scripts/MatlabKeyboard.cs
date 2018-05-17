@@ -25,17 +25,17 @@ public class MatlabKeyboard : Observer {
         string assetPath = Application.persistentDataPath + "/images";
         AssetBundle assets = AssetBundle.LoadFromFile(assetPath);
         serverResponse.text = "";
-        solo12 = (GameObject) Instantiate(assets.LoadAsset("solo12"));
+        solo12 = Instantiate<GameObject>(assets.LoadAsset<GameObject>("solo12"));
         solo12.transform.localScale.Scale(new Vector3(0.25f, 0.25f, 1));
         solo12.transform.localPosition = new Vector3(0, 0, 0);
         solo12.GetComponent<Renderer>().enabled = true;
 
-        solo11 = (GameObject)Instantiate(assets.LoadAsset("solo11"));
+        solo11 = Instantiate<GameObject>(assets.LoadAsset<GameObject>("solo11"));
         solo11.transform.localScale.Scale(new Vector3(0.25f, 0.25f, 1));
         solo11.transform.localPosition = new Vector3(4, 3, 0);
         solo11.GetComponent<Renderer>().enabled = false;
 
-        solo5 = (GameObject)Instantiate(assets.LoadAsset("solo5"));
+        solo5 = Instantiate<GameObject>(assets.LoadAsset<GameObject>("solo5"));
         solo5.transform.localScale.Scale(new Vector3(0.25f, 0.25f, 1));
         solo5.transform.localPosition = new Vector3(4, -3, 0);
         solo5.GetComponent<Renderer>().enabled = false;
@@ -158,7 +158,7 @@ public class MatlabKeyboard : Observer {
             yield return new WaitForSeconds(2*i);
             MATLABclient.mlClient.SendTrialEnd();
             float endTime = Time.time - startTime;
-            // serverResponse.text += endTime.ToString() + "\n";
+            serverResponse.text += endTime.ToString() + "\n";
             yield return new WaitForSeconds(1);
 
         }

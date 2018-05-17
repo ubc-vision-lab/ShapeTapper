@@ -17,7 +17,7 @@ function inRange = eyeOnFixation(fixation_pos, threshold, el, eye_used)
             deviation_from_fixation = fixation_pos - eye_pos;
             if(norm(deviation_from_fixation) <= threshold)
                 inRange = 1;
-                break;
+                return;
             else
                 inRange = 0;
             end;
@@ -25,5 +25,7 @@ function inRange = eyeOnFixation(fixation_pos, threshold, el, eye_used)
             % data is missing... abort?
             inRange = 0;
         end
+    else
+        inRange = 0;
     end
 end
