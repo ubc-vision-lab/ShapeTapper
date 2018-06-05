@@ -17,6 +17,7 @@ public class TryingStringStream : Observer {
     private TrialConfig current_trial_config;
     private List<string> badTrials;
     private List<GameObject> trialEvents;
+	private List<GameObject> eventMasks;
     private GameObject fingerStart;
     public Canvas LetterQuery;
     public Text FeedbackText;
@@ -59,7 +60,8 @@ public class TryingStringStream : Observer {
             experiment_mode,
             e2_x_pos, e2_y_pos,
             e3_x_pos, e3_y_pos,
-            ask_for_target
+            ask_for_target,
+			image_mask, linger_period
         }
         public List<string> trialConfig;
 
@@ -104,8 +106,25 @@ public class TryingStringStream : Observer {
                     float.Parse(trialConfig[(int)ConfigIndex.e3_x_pos]),
                     float.Parse(trialConfig[(int)ConfigIndex.e3_y_pos])));
             }
-            return stimuli;
+
+			return stimuli;
         }
+
+		public List<GameObject> GenerateMasks(AssetBundle assetBundle, List<GameObject> trialEvents)
+		{
+			List<GameObject> mask = new List<GameObject>(); // we're adding to this
+
+			string event_mask_name = trialConfig[(int)ConfigIndex.image_mask]; // get the name of the mask to be applied to all stimuli
+
+			foreach(GameObject trialEvent in trialEvents)
+			{
+				GameObject mask1 = Instantiate<GameObject>(assetBundle.LoadAsset<GameObject>(event_mask_name));
+				mask1.GetComponent<Renderer>().enabled = false;
+				mask1.transform.position = trialEvent.transform.position;
+			}
+			
+			return mask;
+		}
 
         public GameObject ScaleStimulus(GameObject stimulus, float rotation, float scaling, float x_pos, float y_pos)
         {
@@ -435,7 +454,6 @@ public class TryingStringStream : Observer {
                 badTrials.Remove(badTrials[badtrial]);
                 string badTrialsArray = string.Join(";", badTrials.ToArray());
                 PlayerPrefs.SetString("bad", badTrialsArray);
-                trialEvents = current_trial_config.LoadStimuli(imageAssets);
             }
             else if (Absolute_trial_number >= experimentConfigList.Count) // we're done with all the bad flags trials! Exit the block.
             {
@@ -449,11 +467,12 @@ public class TryingStringStream : Observer {
         else // not in bad mode at the moment
         {
             current_trial_config = experimentConfig[Absolute_trial_number];
-            trialEvents = current_trial_config.LoadStimuli(imageAssets);
         }
+		trialEvents = current_trial_config.LoadStimuli(imageAssets);
+		eventMasks = current_trial_config.GenerateMasks(imageAssets, trialEvents);
 
-        // re-display home key, turn off images
-        fingerStart.GetComponent<Renderer>().enabled = true;
+		// re-display home key, turn off images
+		fingerStart.GetComponent<Renderer>().enabled = true;
         this.charStreamText.enabled = true;
 
         Debug.Log("Initialization complete");
