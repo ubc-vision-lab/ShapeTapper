@@ -1,4 +1,5 @@
 ﻿using EnnsLab;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,8 +7,13 @@ using UnityEngine.SceneManagement;
 
 public class TrialDelegate : MonoBehaviour {
 
+	public delegate IEnumerator TrialEvent();
+
+	public static event TrialEvent ReadyToStartTrial;
+	public static event TrialEvent ReadyToPresentStimuli;
+	public static event TrialEvent ReadyForPrompt;
+
 	public AbstractPresenter fixation;
-	public AbstractPresenter stimulus;
 	public AbstractPrompt prompt;
 
 	#region Fields
@@ -15,7 +21,6 @@ public class TrialDelegate : MonoBehaviour {
 	private AbstractPresenter _stimulusPresenter;
 	private string _assetPath;
 	private AssetBundle _shapeAssetBundle;
-	private TrialConfig currTrialConfig;
 	#endregion Fields
 
 	#region Properties
@@ -74,28 +79,22 @@ public class TrialDelegate : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		// TODO: switch this to use some sort of persistent asset bundle management
-		AssetPath = Application.persistentDataPath + "/images";
-		ShapeAssetBundle = AssetBundle.LoadFromFile(AssetPath);
-		if (ExperimentConfig.instance.EndOfExperiment())
-		{
-			ExitBlock(9);
-		}
-		else if (ExperimentConfig.instance.EndOfBlock())
-		{
-			ExitBlock(0);
-		}
-		else currTrialConfig = ExperimentConfig.instance.GetCurrentConfig();
-
-		// set up the presentables
-
-		// at the end somewhere here, set up the delegates
-		// then present the fixation
+		
 	}
 
-	// Update is called once per frame
-	void Update () {
-		
+	protected IEnumerator OnReadyToStartTrial()
+	{
+		return ReadyToStartTrial?.Invoke();
+	}
+
+	protected IEnumerator OnReadyToPresentStimuli()
+	{
+		return ReadyToPresentStimuli?.Invoke();
+	}
+
+	protected IEnumerator OnReadyForPrompt()
+	{
+		return ReadyForPrompt?.Invoke();
 	}
 
 	private void ExitBlock(int flag)

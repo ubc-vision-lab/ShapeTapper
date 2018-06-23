@@ -44,6 +44,23 @@ namespace EnnsLab
 			int.TryParse(info[8], out _exp_mode);
 			int.TryParse(info[9], out _ask_for_target);
 		}
+
+		public TrialSetting(int block_no, int trial_no, bool feedback,
+			bool practice, float block_percentage, bool block_feedback,
+			float time_to_respond, string too_slow_img, int exp_mode,
+			int ask_for_target)
+		{
+			_block_no = block_no;
+			_trial_no = trial_no;
+			_feedback = feedback;
+			_practice = practice;
+			_block_percentage = block_percentage;
+			_block_feedback = block_feedback;
+			_time_to_respond = time_to_respond;
+			_too_slow_img = too_slow_img;
+			_exp_mode = exp_mode;
+			_ask_for_target = ask_for_target;
+		}
 	}
 
 	

@@ -36,3 +36,9 @@ sysinfo.txt
 /Assets/Resources/Image\ Stimuli.
 /Assets/Resources/Image\ Stimuli.*
 /MATLAB/OTC_Code
+
+# Image editor files
+*.xcf
+*.xcf.meta
+*.svg
+*.svg.meta

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -71,6 +72,30 @@ namespace EnnsLab
 				config = value;
 			}
 		}
+
+		public TrialSetting TrialSetting
+		{
+			get
+			{
+				return trialSetting;
+			}
+			set
+			{
+				trialSetting = value;
+			}
+		}
+
+		public List<StimulusInfo> StimulusData
+		{
+			get
+			{
+				return stimulusData;
+			}
+			set
+			{
+				stimulusData = value;
+			}
+		}
 		#endregion Properties
 
 		public enum ConfigIndex : int
@@ -91,7 +116,8 @@ namespace EnnsLab
 			experiment_mode,
 			e2_x_pos, e2_y_pos,
 			e3_x_pos, e3_y_pos,
-			ask_for_target
+			ask_for_target,
+			mask_name, mask_linger_time
 		}
 
 		// legacy code: kept for compatibility purposes
@@ -104,75 +130,82 @@ namespace EnnsLab
 			List<string> expInfoList = Config.GetRange((int)ConfigIndex.block, 8);
 			expInfoList.Add(Config[(int)ConfigIndex.experiment_mode]);
 			expInfoList.Add(Config[(int)ConfigIndex.ask_for_target]);
-			trialSetting = new TrialSetting(expInfoList);
-
+			TrialSetting = ParseTrialSetting();
 			// put all the stimulus into an array
-			ParseStimulusInfo();
+			StimulusData = ParseAllStimuli();
 		}
 
-		public StimulusInfo GetStimulusInfo(int nameIndex, int inSIndex, int posXIndex)
+		private TrialSetting ParseTrialSetting()
 		{
-			List<string> dynamicMaskList = Config.GetRange((int)ConfigIndex.dyn_mask1, 5);
-			List<string> stimulusStringList = Config.GetRange(nameIndex, 8);
-			if (inSIndex == -1)
-			{
-				stimulusStringList[stimulusStringList.Count-1] = "";
-			}
-			Vector2 position = new Vector2(float.Parse(Config[posXIndex]), float.Parse(Config[posXIndex + 1]));
-			// return new StimulusInfo(dynamicMaskList, stimulusStringList, position);
-			return new StimulusInfo();
-		}
-
-		/*
-		 * With the configuration provided, parse the data into StimulusInfo
-		 */
-		private void ParseStimulusInfo()
-		{
-			stimulusData.Add(GetStimulusInfo((int)ConfigIndex.e1_image, (int)ConfigIndex.e1_time_to_e2, (int)ConfigIndex.e1_x_pos));
-			stimulusData.Add(GetStimulusInfo((int)ConfigIndex.e2_image, (int)ConfigIndex.e2_time_to_e3, (int)ConfigIndex.e2_x_pos));
-			stimulusData.Add(GetStimulusInfo((int)ConfigIndex.e3_image, -1, (int)ConfigIndex.e3_x_pos)); // e3 doesn't have an interstimulus time, so we pass in null instead
+			return new TrialSetting(
+				int.Parse(config[(int)ConfigIndex.block]),
+				int.Parse(config[(int)ConfigIndex.trial]),
+				int.Parse(config[(int)ConfigIndex.feedback]) == 1,
+				int.Parse(config[(int)ConfigIndex.practice]) == 1,
+				float.Parse(config[(int)ConfigIndex.block_percentage]),
+				int.Parse(config[(int)ConfigIndex.block_feedback]) == 1,
+				float.Parse(config[(int)ConfigIndex.time_to_respond]),
+				config[(int)ConfigIndex.too_slow_image],
+				int.Parse(config[(int)ConfigIndex.experiment_mode]),
+				int.Parse(config[(int)ConfigIndex.ask_for_target])
+				);
 		}
 
 		/*
 		 * Using the pre-defined stimulus array in this class, fetch and parse the correct columns to create StimulusInfo objects.
 		 * These can be passed into a StimulusFactory object to create stimulus.
 		 */
-		public List<StimulusInfo> GetAllStimuli()
+		public List<StimulusInfo> ParseAllStimuli()
 		{
 			List<StimulusInfo> events = new List<StimulusInfo>();
 
-			for (int i = 0; i < stimuliIdcs.Length; i++)
+			Debug.Log(stimuliIdcs.GetLength(0));
+			for (int i = 0; i < stimuliIdcs.GetLength(0); i++)
 			{
 				// each row is: [image, target, xpos, ypos, rotation, scaling,
-				//            image_display_time, interimage_period, dyn_mask,
-				//            dyn_mask_time]
-				List<string> eventNames = new List<string>();
-				bool is_target = int.Parse(config[stimuliIdcs[i, 1]]) == 1;
-				Vector2 position = new Vector2(int.Parse(config[stimuliIdcs[i, 2]]),
-											int.Parse(config[stimuliIdcs[i, 3]]));
-				float rotation = float.Parse(config[stimuliIdcs[i, 4]]);
-				float scaling = float.Parse(config[stimuliIdcs[i, 5]]);
-				float display_interval = float.Parse(config[stimuliIdcs[i, 6]]);
-				float interstimulus_time = float.Parse(config[stimuliIdcs[i, 7]]);
-				bool is_dyn_mask = int.Parse(config[stimuliIdcs[i, 8]]) >= 1;
-				float dyn_mask_time = float.Parse(config[stimuliIdcs[i,9]]);
+				//			image_display_time, interimage_period, dyn_mask,
+				//			dyn_mask_time]
 
-				if (is_dyn_mask) // dynamic mask
+				// Check if there's anything for this event
+				List<string> eventNames = new List<string>
 				{
-					// if it's a dynamic mask, grab the dynamic mask
-					// we'll use multiple stimulusInfos
-					eventNames = config.GetRange((int)ConfigIndex.dyn_mask1, 5);
+					config[stimuliIdcs[i, 0]] // default to regular event
+				};
+				eventNames.RemoveAll(p => string.IsNullOrEmpty(p)); // remove empty entries
+				bool is_dyn_mask = int.Parse(config[stimuliIdcs[i, 8]]) >= 1;
+
+				if(!is_dyn_mask && eventNames.Count == 0) // no event
+				{
+					continue;
+				}
+				else if(is_dyn_mask)
+				{
+					eventNames.Clear();
+					eventNames.AddRange(config.GetRange((int)ConfigIndex.dyn_mask1, 5)); // default to dynamic mask
 					eventNames.RemoveAll(p => string.IsNullOrEmpty(p)); // remove empty entries
+					if(eventNames.Count == 0)
+					{
+						// wait also nothing?!
+						continue;
+					}
 				}
-				else
+				else // it should be something...
 				{
-					eventNames.Add(config[stimuliIdcs[i, 0]]);
+					bool is_target = int.Parse(config[stimuliIdcs[i, 1]]) == 1;
+					Vector2 position = new Vector2(float.Parse(config[stimuliIdcs[i, 2]]),
+												float.Parse(config[stimuliIdcs[i, 3]]));
+					float rotation = float.Parse(config[stimuliIdcs[i, 4]]);
+					float scaling = float.Parse(config[stimuliIdcs[i, 5]]);
+					float display_interval = float.Parse(config[stimuliIdcs[i, 6]]);
+					float interstimulus_time = float.Parse(config[stimuliIdcs[i, 7]]);
+
+					float dyn_mask_time = float.Parse(config[stimuliIdcs[i, 9]]);
+
+					events.Add(new StimulusInfo(eventNames, is_target, position, rotation, scaling, display_interval, interstimulus_time, is_dyn_mask, dyn_mask_time));
 				}
-				events.Add(new StimulusInfo(eventNames, is_target, position, rotation, scaling, display_interval, interstimulus_time, is_dyn_mask, dyn_mask_time));
 			}
 			return events;
 		}
-
 
 		#region Tests
 		[Test]

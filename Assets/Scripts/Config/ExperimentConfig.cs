@@ -23,7 +23,14 @@ public class ExperimentConfig : MonoBehaviour {
 	{
 		if(instance != null)
 		{
-			return;
+			if (instance == this)
+			{
+				return;
+			}
+			else
+			{
+				Destroy(this);
+			}
 		}
 		else
 		{
@@ -98,7 +105,7 @@ public class ExperimentConfig : MonoBehaviour {
 	public TrialConfig GetCurrentConfig()
 	{
 		return trialConfigs[PlayerPrefs.GetInt(linePrefName,0)];
-	}   
+	}
 
 	public bool EndOfBlock()
 	{
