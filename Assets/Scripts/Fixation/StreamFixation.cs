@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Canvas))]
-public class StreamFixation : AbstractPresenter
+
+public class StreamFixation : AbstractFixation
 {
 
 	#region private fields
@@ -168,7 +168,7 @@ public class StreamFixation : AbstractPresenter
 	#endregion
 
 	#region Methods
-	public override IEnumerator Present()
+	protected override IEnumerator ProgressFixation()
 	{
 		WaitForSecondsRealtime waitStimulusTime = new WaitForSecondsRealtime(StimulusDuration); // We always want this to be this period
 		foreach (string character in CharStream)

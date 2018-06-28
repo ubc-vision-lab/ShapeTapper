@@ -15,12 +15,20 @@ public class ExperimentConfig : MonoBehaviour {
 
 	public static ExperimentConfig instance;
 
+	public AssetBundle assetBundle;
 	private List<TrialConfig> trialConfigs = new List<TrialConfig>();
 	private const string linePrefName = "line";
 
 	// Use this for Singleton initialization
 	void Awake()
 	{
+		assetBundle = AssetBundle.LoadFromFile(Application.persistentDataPath + "/images");
+		if(assetBundle == null)
+		{
+			// rip. no asset bundle = no experiment
+			Debug.Log("No Asset Bundle found.");
+		}
+		else { Debug.Log("Asset bundle loaded."); }
 		if(instance != null)
 		{
 			if (instance == this)
@@ -42,6 +50,11 @@ public class ExperimentConfig : MonoBehaviour {
 			DontDestroyOnLoad(this);
 			Debug.Log("ExperimentConfig instantiated.");
 		}
+	}
+
+	private void OnDestroy()
+	{
+		assetBundle.Unload(true);
 	}
 
 	#region SetupFunctions

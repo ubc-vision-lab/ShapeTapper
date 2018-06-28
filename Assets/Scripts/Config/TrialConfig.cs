@@ -159,7 +159,6 @@ namespace EnnsLab
 		{
 			List<StimulusInfo> events = new List<StimulusInfo>();
 
-			Debug.Log(stimuliIdcs.GetLength(0));
 			for (int i = 0; i < stimuliIdcs.GetLength(0); i++)
 			{
 				// each row is: [image, target, xpos, ypos, rotation, scaling,

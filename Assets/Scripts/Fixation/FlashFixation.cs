@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FlashFixation : AbstractPresenter {
+public class FlashFixation : AbstractFixation {
 
 	// Use this for initialization
 	void Start () {
@@ -15,9 +15,12 @@ public class FlashFixation : AbstractPresenter {
 		
 	}
 
+	protected override IEnumerator ProgressFixation()
+	{
+		throw new NotImplementedException();
+	}
 
-
-	public override IEnumerator Present()
+	protected override IEnumerator ShowFixation()
 	{
 		// waitforit
 		throw new NotImplementedException();
