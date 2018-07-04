@@ -60,7 +60,7 @@ public class MATLABclient : MonoBehaviour {
         }
         catch(Exception e)
         {
-            Debug.Log("Socket error: " + e.Message);
+            Debug.LogException(e);
         }
     }
 

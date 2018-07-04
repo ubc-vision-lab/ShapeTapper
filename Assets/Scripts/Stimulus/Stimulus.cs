@@ -159,9 +159,9 @@ namespace EnnsLab
 			{
 				SetupStimulus(stimInfo[EventNumber]);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
-				Debug.Log(e.Message);
+				Debug.LogException(e);
 				Debug.Log(EventNumber);
 			}
 		}
@@ -201,7 +201,7 @@ namespace EnnsLab
 				Debug.Log("Adding " + stim_name);
 				// formatting?
 				StimulusObjects.Add(
-					Instantiate<GameObject>(experimentConfig.assetBundle.LoadAsset<GameObject>(stim_name))
+					Instantiate(experimentConfig.assetBundle.LoadAsset<GameObject>(stim_name))
 				);
 				Debug.Log("Added " + stim_name);
 			}
@@ -245,13 +245,15 @@ namespace EnnsLab
 				stimulusRenderer.enabled = false;
 
 				// Resize the stimulus to the screen
-				Vector2 img_dim = new Vector2(stimulusRenderer.bounds.size.x, stimulusRenderer.bounds.size.y);
+				Vector2 img_dim = new Vector2(stimulusRenderer.bounds.size.x,stimulusRenderer.bounds.size.y);
 				float diag = img_dim.magnitude;
 				float scaleFactor = diag / newImageDiag;
 				stimulusObject.transform.localScale.Scale(new Vector3(scaleFactor, scaleFactor, 1));
 
-				stimulusObject.transform.position = Vector3.Scale(Position, new Vector3(margin_x / 100f, margin_y / 100f));
-				stimulusObject.transform.position = stimulusObject.transform.position - new Vector3(margin_x / 2, margin_y / 2, 0);
+				stimulusObject.transform.position =
+					Vector3.Scale(Position, new Vector3(margin_x / 100f, margin_y / 100f));
+				stimulusObject.transform.position =
+					stimulusObject.transform.position - new Vector3(margin_x / 2, margin_y / 2, 0);
 
 				stimulusObject.transform.eulerAngles = new Vector3(0, 0, Rotation);
 			}
@@ -262,7 +264,7 @@ namespace EnnsLab
 		{
 			StimulusObjects = new List<GameObject>();
 			experimentConfig = FindObjectOfType<ExperimentConfig>();
-			if(experimentConfig == null)
+			if (experimentConfig == null)
 			{
 				Debug.Log("No experiment configuration object found.");
 			}

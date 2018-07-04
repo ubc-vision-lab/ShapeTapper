@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using EnnsLab;
@@ -78,8 +79,7 @@ public class ExperimentConfig : MonoBehaviour {
 				trialConfigs.Add(new TrialConfig(configStream.ReadLine()));
 			}
 			configStream.Close();
-		}
-		catch (System.Exception e) // something's wrong with the file?
+		} catch(Exception e) // something's wrong with the file?
 		{
 			Debug.Log("Error parsing file " + configFullPathName);
 			Debug.Log("StreamReader returned with the following error: " + e.Message);

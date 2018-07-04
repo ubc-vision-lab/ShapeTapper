@@ -6,9 +6,14 @@ public class PointerTrigger : FixationTrigger {
 
 	private AbstractFixation fixation;
 
+	private void Awake()
+	{
+		fixation = GameObject.FindObjectOfType<AbstractFixation>();
+	}
+
 	// Use this for initialization
 	void Start () {
-		fixation = GameObject.FindObjectOfType<AbstractFixation>();
+		
 	}
 	
 	// Update is called once per frame

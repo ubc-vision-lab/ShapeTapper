@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class NoFixation : AbstractFixation {
 
@@ -16,7 +17,7 @@ public class NoFixation : AbstractFixation {
 
 	protected override IEnumerator ProgressFixation()
 	{
-		yield return new WaitForSeconds(0f);
+		throw new NotImplementedException();
+
 	}
 }
-
