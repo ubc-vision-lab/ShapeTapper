@@ -10,8 +10,7 @@ public class EmptyFixation : AbstractFixation {
 	void Awake()
 	{
 		assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
-		var fixationInfo = ExperimentConfig.instance.GetFixationInfo();
-
+		var trialSetting = ExperimentConfig.instance.GetCurrentConfig().TrialSetting;
 	}
 
 	// Use this for initialization

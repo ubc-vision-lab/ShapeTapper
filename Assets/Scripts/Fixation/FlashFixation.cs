@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class FlashFixation : AbstractFixation {
 
+	private GameObject fixationCross;
+	private GameObject fingerHome;
+
 	// Use this for initialization
 	void Start () {
 		

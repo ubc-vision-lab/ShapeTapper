@@ -168,6 +168,11 @@ public class StreamFixation : AbstractFixation
 	#endregion
 
 	#region Methods
+	protected override void ShowFixation()
+	{
+		throw new NotImplementedException();
+	}
+
 	protected override IEnumerator ProgressFixation()
 	{
 		WaitForSecondsRealtime waitStimulusTime = new WaitForSecondsRealtime(StimulusDuration); // We always want this to be this period
