@@ -15,14 +15,14 @@ public class FlashFixation : AbstractFixation {
 		
 	}
 
-	protected override IEnumerator ProgressFixation()
+	protected override void ShowFixation()
 	{
-		throw new NotImplementedException();
+		fixationCross.GetComponent<Renderer>().enabled = true;
+		fingerHome.GetComponent<Renderer>().enabled = true;
 	}
 
-	protected override IEnumerator ShowFixation()
+	protected override IEnumerator ProgressFixation()
 	{
-		// waitforit
 		throw new NotImplementedException();
 	}
 }
