@@ -6,5 +6,6 @@ using UnityEngine;
 [Serializable]
 public class Column : ScriptableObject {
 
-	public Tuple<int, Type> column;
+	public int columnNumber;
+	public Type columnType;
 }

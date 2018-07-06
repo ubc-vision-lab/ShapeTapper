@@ -9,7 +9,11 @@ using System.Net;
 
 public class MATLABclient : MonoBehaviour {
 
-	public static MATLABclient mlClient;
+	public delegate void ProcessMessage(string message);
+
+	public static event ProcessMessage OnMessageReceived;
+
+	public static MATLABclient instance;
 	private bool socketReady;
 	
 	private TcpClient socket;
@@ -18,8 +22,6 @@ public class MATLABclient : MonoBehaviour {
 	private StreamWriter writer;
 	private StreamReader reader;
 	public Text connectionText;
-
-	public Subject subject = new Subject();
 
 	public bool SocketReady
 	{
@@ -83,7 +85,7 @@ public class MATLABclient : MonoBehaviour {
 	#region UnityEvents
 	void Awake()
 	{
-		if (mlClient != null)
+		if (instance != null)
 		{
 			Destroy(this);
 		}
@@ -91,8 +93,7 @@ public class MATLABclient : MonoBehaviour {
 		{
 			Debug.Log("Connect to matlab");
 			this.ConnectToMatlab();
-			this.subject = new Subject();
-			mlClient = this;
+			instance = this;
 			DontDestroyOnLoad(this);
 			Debug.Log("Connected");
 		}
@@ -105,21 +106,18 @@ public class MATLABclient : MonoBehaviour {
 	void Update () {
 		if (SocketReady && stream != null && stream.DataAvailable)
 		{
-			if(subject != null)
-			{
-				subject.Notify();
-			}
+			OnMessageReceived(GetResponse());
 		}
 	}
 
 	private void OnApplicationQuit()
 	{
-		MATLABclient.mlClient.SendExit();
+		MATLABclient.instance.SendExit();
 	}
 
 	private void OnDestroy()
 	{
-		MATLABclient.mlClient.SendExit();
+		MATLABclient.instance.SendExit();
 	}
 	#endregion UnityEvents
 

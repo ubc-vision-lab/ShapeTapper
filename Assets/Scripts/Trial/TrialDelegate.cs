@@ -82,19 +82,27 @@ public class TrialDelegate : MonoBehaviour {
 		
 	}
 
-	protected IEnumerator OnReadyToStartTrial()
+	protected void OnReadyToStartTrial()
 	{
-		return ReadyToStartTrial?.Invoke();
+        if (ReadyToStartTrial == null)
+        {
+        } else ReadyToStartTrial.Invoke();
 	}
 
-	protected IEnumerator OnReadyToPresentStimuli()
+	protected void OnReadyToPresentStimuli()
 	{
-		return ReadyToPresentStimuli?.Invoke();
+        if (ReadyToPresentStimuli == null)
+        {
+        }
+        else ReadyToPresentStimuli.Invoke();
 	}
 
-	protected IEnumerator OnReadyForPrompt()
+	protected void OnReadyForPrompt()
 	{
-		return ReadyForPrompt?.Invoke();
+        if (ReadyForPrompt == null)
+        {
+        }
+        else ReadyForPrompt.Invoke();
 	}
 
 	private void ExitBlock(int flag)

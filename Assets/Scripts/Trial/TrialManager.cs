@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace EnnsLab
 {
-	public partial class TrialManager : Observer
+	public partial class TrialManager : MonoBehaviour
 	{
 
 		// Configuration variables
@@ -60,6 +60,16 @@ namespace EnnsLab
 		}
 
 		#region UnityEvents
+		void OnEnable()
+		{
+			MATLABclient.OnMessageReceived += OnMessage;
+		}
+
+		void OnDisable()
+		{
+			MATLABclient.OnMessageReceived -= OnMessage;
+		}
+
 		// Use this for initialization
 		void Start()
 		{
@@ -95,9 +105,6 @@ namespace EnnsLab
 			scalingFactor.Scale(home_button_inverse);
 			fingerStart.transform.localScale = scalingFactor;
 			Debug.Log(fingerStart.GetComponent<Renderer>().bounds.size);
-
-			// network communications
-			MATLABclient.mlClient.subject.AddObserver(this);
 
 			// Initialize the state machine
 			state = State.InitTrial;
@@ -138,7 +145,7 @@ namespace EnnsLab
 		private void OnApplicationQuit()
 		{
 			PlayerPrefs.SetInt("lastBlockLine", PlayerPrefs.GetInt("line", 0));
-			MATLABclient.mlClient.SendExit();
+			MATLABclient.instance.SendExit();
 			// cleanup stuff goes here
 		}
 
@@ -146,7 +153,6 @@ namespace EnnsLab
 		{
 			imageAssets.Unload(true);
 			PlayerPrefs.SetInt("endNum", PlayerPrefs.GetInt("line", 0));
-			MATLABclient.mlClient.subject.RemoveObserver(this);
 			PlayerPrefs.SetInt("lastBlockLine", PlayerPrefs.GetInt("line", 0));
 		}
 
@@ -263,15 +269,13 @@ namespace EnnsLab
 		#endregion
 
 		#region behaviour
-		public override void OnNotify()
+		public void OnMessage(string message)
 		{
-			Debug.Log("Reading response");
-			string response = MATLABclient.mlClient.GetResponse();
-			if (response.Contains("Fixation"))
+			if (message.Contains("Fixation"))
 			{
 				eye_on_fixation = true;
 			}
-			else if (response.Contains("Restart"))
+			else if (message.Contains("Restart"))
 			{
 				if (state >= State.InitTrial && state < State.AskForLetter)
 				// once you ask for the letter don't check the eye anymore
@@ -280,7 +284,7 @@ namespace EnnsLab
 					good_trial = false;
 				}
 			}
-			Debug.Log(response);
+			Debug.Log(message);
 		}
 
 		public bool CheckMouseCollision(string objectName)
@@ -329,7 +333,7 @@ namespace EnnsLab
 
 			// reset trial variables
 			good_trial = true;
-			if (MATLABclient.mlClient.SocketReady)
+			if (MATLABclient.instance.SocketReady)
 			{
 				eye_on_fixation = false;
 			}
@@ -394,7 +398,7 @@ namespace EnnsLab
 			// send the Eyelink Signal
 			string trialString = "(" + current_trial_config.Config[(int)TrialConfig.ConfigIndex.block] + "," +
 				current_trial_config.Config[(int)TrialConfig.ConfigIndex.trial] + ")";
-			MATLABclient.mlClient.SendEyelinkBegin(trialString);
+			MATLABclient.instance.SendEyelinkBegin(trialString);
 
 			while (!eye_on_fixation) // wait for the eye to be on the fixation
 			{
@@ -428,7 +432,7 @@ namespace EnnsLab
 					{
 						Debug.Log("Finger not on start!");
 					}
-					MATLABclient.mlClient.SendRestart();
+					MATLABclient.instance.SendRestart();
 					good_trial = false;
 					break;
 				}
@@ -445,7 +449,7 @@ namespace EnnsLab
 			}
 			else
 			{
-				MATLABclient.mlClient.SendOptotrackBegin();
+				MATLABclient.instance.SendOptotrackBegin();
 				state = State.Image;
 			}
 			NextState();
@@ -477,7 +481,7 @@ namespace EnnsLab
 			}
 			if (state == State.Image) // they kept their eye and finger on initial position the whole time
 			{
-				MATLABclient.mlClient.SendTrialEnd();
+				MATLABclient.instance.SendTrialEnd();
 				state = State.Feedback;
 				good_trial = false;
 			}
@@ -498,7 +502,7 @@ namespace EnnsLab
 
 			Debug.Log("Turning off renderer for shape");
 			trialEvents[1].GetComponent<Renderer>().enabled = false;
-			MATLABclient.mlClient.SendTrialEnd();
+			MATLABclient.instance.SendTrialEnd();
 			yield return new WaitForSeconds(0.5f);
 			state = State.AskForLetter;
 			NextState();

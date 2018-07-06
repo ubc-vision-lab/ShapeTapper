@@ -147,8 +147,10 @@ namespace EnnsLab
 				float.Parse(config[(int)ConfigIndex.time_to_respond]),
 				config[(int)ConfigIndex.too_slow_image],
 				int.Parse(config[(int)ConfigIndex.experiment_mode]),
-				int.Parse(config[(int)ConfigIndex.ask_for_target])
-				);
+				int.Parse(config[(int)ConfigIndex.ask_for_target]),
+                float.Parse(config[(int)ConfigIndex.stimulus_onset]),
+                int.Parse(config[(int)ConfigIndex.loop_trial])==1
+                );
 		}
 
 		/*
