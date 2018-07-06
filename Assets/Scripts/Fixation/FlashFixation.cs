@@ -8,6 +8,12 @@ public class FlashFixation : AbstractFixation {
 	private GameObject fixationCross;
 	private GameObject fingerHome;
 
+	private void Awake()
+	{
+		assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
+		var trialSetting = ExperimentConfig.instance.GetCurrentConfig().TrialSetting;
+	}
+
 	// Use this for initialization
 	void Start () {
 		

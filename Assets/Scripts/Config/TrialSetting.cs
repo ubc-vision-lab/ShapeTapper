@@ -16,6 +16,8 @@ namespace EnnsLab
 		public string _too_slow_img = "";
 		public int _exp_mode;
 		public int _ask_for_target;
+		public float _stimulus_onset = 0f;
+		public bool _loop_trial = false;
 
 		/*
 		 * Given string of information, creates a TrialSetting. String must be
@@ -43,6 +45,8 @@ namespace EnnsLab
 			_too_slow_img = info[7];
 			int.TryParse(info[8], out _exp_mode);
 			int.TryParse(info[9], out _ask_for_target);
+			float.TryParse(info[10], out _stimulus_onset);
+			_loop_trial
 		}
 
 		public TrialSetting(int block_no, int trial_no, bool feedback,

@@ -70,7 +70,7 @@ public class AssetBundleMenu
 				BuildBundle(path + "/PC", BuildTarget.StandaloneWindows);
 			
 			if(EditorPrefs.GetBool("buildOSX", false))
-				BuildBundle(path + "/OSX", BuildTarget.StandaloneOSXUniversal);
+				BuildBundle(path + "/OSX", BuildTarget.StandaloneOSX);
 			
 			if(EditorPrefs.GetBool("buildiOS", false))
 				BuildBundle(path + "/iOS", BuildTarget.iOS);

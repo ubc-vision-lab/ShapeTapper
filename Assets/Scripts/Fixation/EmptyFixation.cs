@@ -36,6 +36,7 @@ public class EmptyFixation : AbstractFixation {
 	{
 		progressCoroutineRunning = true;
 		yield return new WaitForSecondsRealtime(trialOnset);
+		OnPrimary();
 		progressCoroutineRunning = false;
 	}
 }
