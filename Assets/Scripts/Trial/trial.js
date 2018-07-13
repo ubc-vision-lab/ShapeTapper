@@ -220,7 +220,7 @@ function AddData() {
 	data += (touchXY.y).ToString();
 	PlayerPrefs.SetString("Data", data);
 
-	Application.LoadLevel(4);
+	SceneManagement.SceneManager.LoadScene(4);
 }
 
 function ReadFile() {
@@ -651,7 +651,7 @@ function going(flag: int) {
 		PlayerPrefs.SetInt("badflag", 0);
 		PlayerPrefs.SetInt("exit_flag", flag);
 		PlayerPrefs.SetInt("lastBlockLine", PlayerPrefs.GetInt("line", 0));
-		Application.LoadLevel(5);
+		SceneManagement.SceneManager.LoadScene(5);
 	}
 }
 

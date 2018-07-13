@@ -3,15 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FlashFixation : AbstractFixation {
+public class FlashFixation : MonoBehaviour, IFixation {
 
 	private GameObject fixationCross;
 	private GameObject fingerHome;
+	private GameObject targetFlash;
 
 	private void Awake()
 	{
-		assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
+		var assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
 		var trialSetting = ExperimentConfig.instance.GetCurrentConfig().TrialSetting;
+		if(trialSetting._exp_mode == 2)
+		{
+			targetFlash = assetBundle.LoadAsset<GameObject>(ExperimentConfig.instance.GetCurrentConfig().GetTargetName());
+		}
 	}
 
 	// Use this for initialization
@@ -24,14 +29,19 @@ public class FlashFixation : AbstractFixation {
 		
 	}
 
-	protected override void ShowFixation()
+	public void ShowFixation()
 	{
 		fixationCross.GetComponent<Renderer>().enabled = true;
 		fingerHome.GetComponent<Renderer>().enabled = true;
 	}
 
-	protected override IEnumerator ProgressFixation()
+	public IEnumerator ProgressFixation()
 	{
 		throw new NotImplementedException();
+	}
+
+	public void CompleteFixation()
+	{
+
 	}
 }

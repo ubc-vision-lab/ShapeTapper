@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class AbstractFixation : MonoBehaviour {
+public class FixationManager : MonoBehaviour {
 
 	public delegate void FixationEvent(); // callback when complete?
 
@@ -27,13 +27,4 @@ public abstract class AbstractFixation : MonoBehaviour {
 	{
 		Secondary();
 	}
-
-
-
-	protected abstract void ShowFixation();
-
-	protected abstract IEnumerator ProgressFixation();
-
-	protected virtual void CompleteFixation() { }
-
 }

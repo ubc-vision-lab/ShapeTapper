@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class PointerTrigger : FixationTrigger {
 
-	private AbstractFixation fixation;
+	private FixationManager fixation;
 
 	private void Awake()
 	{
-		fixation = GameObject.FindObjectOfType<AbstractFixation>();
+		fixation = GameObject.FindObjectOfType<FixationManager>();
 	}
 
 	// Use this for initialization

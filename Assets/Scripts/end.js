@@ -86,5 +86,5 @@ function ShortPause(){
 	sr.Close();
 	
 	yield WaitForSeconds(5);
-	Application.LoadLevel(2);
+	SceneManagement.SceneManager.LoadScene(2);
 }

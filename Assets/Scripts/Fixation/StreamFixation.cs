@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class StreamFixation : AbstractFixation
+public class StreamFixation : MonoBehaviour, IFixation
 {
 
 	#region private fields
@@ -167,13 +167,13 @@ public class StreamFixation : AbstractFixation
 	}
 	#endregion
 
-	#region Methods
-	protected override void ShowFixation()
+	#region Interface Methods
+	public void ShowFixation()
 	{
-		throw new NotImplementedException();
+
 	}
 
-	protected override IEnumerator ProgressFixation()
+	public IEnumerator ProgressFixation()
 	{
 		WaitForSecondsRealtime waitStimulusTime = new WaitForSecondsRealtime(StimulusDuration); // We always want this to be this period
 		foreach (string character in CharStream)
@@ -196,6 +196,13 @@ public class StreamFixation : AbstractFixation
 		}
 	}
 
+	public void CompleteFixation()
+	{
+		throw new NotImplementedException();
+	}
+	#endregion Interface Methods
+
+	#region Methods
 	private void RecordTargetTime(float charStartTime)
 	{
 		Target_onset_time = charStartTime;
@@ -243,12 +250,12 @@ public class StreamFixation : AbstractFixation
 	#endregion Methods
 
 	#region Unity Event Functions
-	private void Start()
+	private void Awake()
 	{
 		
 	}
 
-	private void Update()
+	private void OnEnable()
 	{
 		
 	}

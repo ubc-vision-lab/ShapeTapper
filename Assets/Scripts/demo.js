@@ -103,7 +103,7 @@ function OnGUI () {
 			
 			sr.Close();
 			
-			Application.LoadLevel(2);
+			SceneManagement.SceneManager.LoadScene(2);
 		}
 			
 	

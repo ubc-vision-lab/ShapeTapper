@@ -201,7 +201,12 @@ namespace EnnsLab
 				Debug.Log("Adding " + stim_name);
 				// formatting?
 				StimulusObjects.Add(
-					Instantiate(experimentConfig.assetBundle.LoadAsset<GameObject>(stim_name))
+					Instantiate(
+						experimentConfig
+							.assetBundle
+							.LoadAsset<GameObject>(stim_name),
+						gameObject.transform
+					)
 				);
 				Debug.Log("Added " + stim_name);
 			}
@@ -229,15 +234,15 @@ namespace EnnsLab
 		public void ResizeAll()
 		{
 			// applies to all images
-			float screenHeight = 2f * Camera.main.orthographicSize;
-			float screenWidth = screenHeight * Camera.main.aspect;
-			float newImageDiag = screenHeight * scale / 100;
+			float screenOrthoHeight = 2f * Camera.main.orthographicSize;
+			float screenOrthoWidth = screenOrthoHeight * Camera.main.aspect;
+			float newImageDiag = screenOrthoHeight * scale / 100;
 			//float maxImageWidth = screenWidth * scale / 100;
 
-			float pixelOrthoRatio = Screen.height / 2f / Camera.main.orthographicSize;
-			float border = 3 * Screen.dpi / pixelOrthoRatio / 8; // 3/8ths of an inch on the edges
-			float margin_x = screenWidth - newImageDiag - border;
-			float margin_y = screenHeight - newImageDiag - border;
+			float pixelOrthoRatio = Screen.height / screenOrthoHeight;
+			float border = 0 * Screen.dpi / pixelOrthoRatio / 8; // 3/8ths of an inch on the edges
+			float margin_x = screenOrthoWidth - newImageDiag - border;
+			float margin_y = screenOrthoHeight - newImageDiag - border;
 
 			foreach (GameObject stimulusObject in StimulusObjects)
 			{
@@ -247,9 +252,8 @@ namespace EnnsLab
 				// Resize the stimulus to the screen
 				Vector2 img_dim = new Vector2(stimulusRenderer.bounds.size.x,stimulusRenderer.bounds.size.y);
 				float diag = img_dim.magnitude;
-				float scaleFactor = diag / newImageDiag;
-				stimulusObject.transform.localScale.Scale(new Vector3(scaleFactor, scaleFactor, 1));
-
+				float scaleFactor = newImageDiag / diag;
+				stimulusObject.transform.localScale = new Vector3(scaleFactor, scaleFactor, 1);
 				stimulusObject.transform.position =
 					Vector3.Scale(Position, new Vector3(margin_x / 100f, margin_y / 100f));
 				stimulusObject.transform.position =

@@ -208,6 +208,22 @@ namespace EnnsLab
 			return events;
 		}
 
+		public string GetTargetName()
+		{
+			if(stimulusData.Count <= 0)
+			{
+				return null;
+			}
+			foreach(StimulusInfo stimInfo in stimulusData)
+			{
+				if (stimInfo.Is_target)
+				{
+					return stimInfo.StimulusNames[0];
+				}
+			}
+			return "";
+		}
+
 		#region Tests
 		[Test]
 		void ThreeStimuliTest() {

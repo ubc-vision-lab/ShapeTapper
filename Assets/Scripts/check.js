@@ -21,7 +21,7 @@ private var popupFlag : boolean;
 function Start () {
 
 	if(PlayerPrefs.GetString("UserID","") != ""){
-			Application.LoadLevel(2);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(2);
 	}
 		
 	stringToEdit = "config.txt";
@@ -90,7 +90,7 @@ function masterChecker(configName){
 	}
 	if(guiOn == 5){
 		PlayerPrefs.SetString("configName",stringToEdit);
-		Application.LoadLevel(1);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(1);
 	}
 }
 
