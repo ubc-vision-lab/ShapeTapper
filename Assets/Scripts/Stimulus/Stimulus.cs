@@ -155,14 +155,22 @@ namespace EnnsLab
 		{
 			TrialConfig currentConfig = ExperimentConfig.instance.GetCurrentConfig();
 			List<StimulusInfo> stimInfo = currentConfig.ParseAllStimuli();
-			try
+			if (stimInfo.Count <= EventNumber)
 			{
-				SetupStimulus(stimInfo[EventNumber]);
+				Destroy(gameObject);
 			}
-			catch (Exception e)
+			else
 			{
-				Debug.LogException(e);
-				Debug.Log(EventNumber);
+				try
+				{
+					SetupStimulus(stimInfo[EventNumber]);
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+					Debug.Log(EventNumber);
+					Destroy(gameObject);
+				}
 			}
 		}
 

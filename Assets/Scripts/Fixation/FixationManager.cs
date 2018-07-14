@@ -9,11 +9,24 @@ public class FixationManager : MonoBehaviour {
 
 	// Events
 	public static event FixationEvent Primary; // to show first part of fixation
-	public static event FixationEvent Secondary; // 
+	public static event FixationEvent Secondary; // second have of stimulus set
 
-	protected AssetBundle assetBundle;
-	protected Coroutine progressCoroutine;
-	protected bool progressCoroutineRunning;
+	// private fields
+	TrialSetting trialSetting;
+
+	void Awake()
+	{
+		trialSetting = ExperimentConfig.instance.GetCurrentConfig().TrialSetting;
+	}
+
+	/// <summary>
+	/// Creates the correct Fixations corresponding to the TrialSetting.
+	/// </summary>
+	private void Start()
+	{
+
+	}
+
 
 	/**
 	 * The initial condition to begin presenting the stimulus was satisfied
