@@ -6,13 +6,10 @@ public abstract class AbstractPresenter : MonoBehaviour
 {
 	private TrialDelegate trialManager;
 	public static List<IStimulus> ToBePresented = new List<IStimulus>();
+	protected List<Coroutine> stimulusCoroutines = new List<Coroutine>();
+
 	// Runs the behaviour of the fixation
-	public virtual IEnumerator Present() {
-		foreach(IStimulus stimulus in ToBePresented)
-		{
-			yield return stimulus.Stimulate();
-		}
-	}
+	public abstract IEnumerator Present();
 
 	protected virtual void OnEnable()
 	{
@@ -22,6 +19,7 @@ public abstract class AbstractPresenter : MonoBehaviour
 			TrialDelegate.ReadyToPresentStimuli += Present;
 		}
 		else { return; }
+		trialManager.StimulusReady();
 	}
 
 	protected virtual void OnDisable()

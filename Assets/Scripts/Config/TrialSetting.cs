@@ -46,7 +46,7 @@ namespace EnnsLab
 			int.TryParse(info[8], out _exp_mode);
 			int.TryParse(info[9], out _ask_for_target);
 			float.TryParse(info[10], out _stimulus_onset);
-            _loop_trial = int.Parse(info[11]) == 1;
+			_loop_trial = int.Parse(info[11]) == 1;
 		}
 
 		public TrialSetting(int block_no, int trial_no, bool feedback,
@@ -64,8 +64,17 @@ namespace EnnsLab
 			_too_slow_img = too_slow_img;
 			_exp_mode = exp_mode;
 			_ask_for_target = ask_for_target;
-            _stimulus_onset = stimulus_onset;
-            _loop_trial = loop_trial;
+			_stimulus_onset = stimulus_onset;
+			_loop_trial = loop_trial;
+		}
+
+		public enum ExpMode : int
+		{
+			original,
+			oddball,
+			spider,
+			same_different,
+			flasher
 		}
 	}
 

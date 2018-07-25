@@ -36,6 +36,10 @@ sysinfo.txt
 /Assets/Resources/Image\ Stimuli.
 /Assets/Resources/Image\ Stimuli.*
 /MATLAB/OTC_Code
+/UnityPackageManager
+
+# other documents
+*.pdf
 
 # Image editor files
 *.xcf

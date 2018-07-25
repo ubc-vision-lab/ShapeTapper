@@ -13,7 +13,7 @@ public class StreamFixation : MonoBehaviour, IFixation
 	private string _possibleLetters;
 	private string[] charStream;
 	private string _targetLetter = "";
-	public Text _charStreamText; // jokes this one is public
+	[SerializeField] Text _charStreamText; // jokes this one is public
 
 	private int _targetIdx;
 	private int _repeatDistance;
@@ -21,6 +21,7 @@ public class StreamFixation : MonoBehaviour, IFixation
 	private float _targetRecordedDuration;
 	private float _stimulusDuration;
 	private float _displayDuration;
+	private Coroutine progressFixationCoroutine;
 	#endregion
 
 	#region Properties
@@ -168,6 +169,13 @@ public class StreamFixation : MonoBehaviour, IFixation
 	#endregion
 
 	#region Interface Methods
+	public IEnumerator RunFixation()
+	{
+		progressFixationCoroutine = StartCoroutine(ProgressFixation());
+		yield return progressFixationCoroutine;
+		CompleteFixation();
+	}
+
 	public void ShowFixation()
 	{
 
@@ -252,7 +260,12 @@ public class StreamFixation : MonoBehaviour, IFixation
 	#region Unity Event Functions
 	private void Awake()
 	{
-		
+		_charStreamText = FindObjectOfType<Text>();
+	}
+
+	void Start()
+	{
+		ShowFixation();
 	}
 
 	private void OnEnable()

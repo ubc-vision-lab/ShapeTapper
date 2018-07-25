@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-[RequireComponent(typeof(FixationManager))]
 public class EmptyFixation : MonoBehaviour, IFixation
 {
 	private FixationManager fixationManager;
 	private float trialOnset;
+
 	private Coroutine progressFixationCoroutine;
 	private bool progressFixationComplete = false;
 
 	void Awake()
 	{
+		fixationManager = gameObject.GetComponentInParent<FixationManager>();
 		var assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
 		try
 		{
@@ -24,24 +25,27 @@ public class EmptyFixation : MonoBehaviour, IFixation
 			Debug.LogException(e);
 			trialOnset = 0.5f;
 		}
-		finally
-		{
-			Debug.Log("Trial to start in " + trialOnset + " seconds.");
-		}
-		
+	}
+
+	void OnEnable()
+	{
+		Debug.Log("Trial uses Empty Fixation.");
+		Debug.Log("Trial to start in " + trialOnset + " seconds.");
+
 	}
 
 	// Use this for initialization
 	void Start () {
 		ShowFixation();
-		progressFixationCoroutine = StartCoroutine(ProgressFixation());
 	}
 	
 	void Update () {
-		if(!progressFixationComplete)
-		{
-			CompleteFixation();
-		}
+	}
+
+	public IEnumerator RunFixation()
+	{
+		progressFixationCoroutine = StartCoroutine(ProgressFixation());
+		yield return progressFixationCoroutine;
 	}
 
 	/// <summary>
@@ -49,6 +53,7 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	/// </summary>
 	public void ShowFixation()
 	{
+		Debug.Log("EmptyFixation.ShowFixation");
 		// no fixation to show
 	}
 
@@ -58,10 +63,12 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	/// <returns></returns>
 	public IEnumerator ProgressFixation()
 	{
+		Debug.Log("EmptyFixation.ProgressFixation");
 		progressFixationComplete = false;
 		yield return new WaitForSecondsRealtime(trialOnset);
 		fixationManager.OnPrimary();
 		progressFixationComplete = true;
+		CompleteFixation();
 	}
 
 	/// <summary>
@@ -69,6 +76,7 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	/// </summary>
 	public void CompleteFixation()
 	{
+		Debug.Log("EmptyFixation.CompleteFixation");
 		// nothing happens here also
 	}
 }

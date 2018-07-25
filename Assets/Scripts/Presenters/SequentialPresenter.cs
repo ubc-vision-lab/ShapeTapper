@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SimultaneousPresenter : AbstractPresenter
-{
+public class SequentialPresenter : AbstractPresenter {
+
+	// Use this for initialization
 	public override IEnumerator Present()
 	{
 		foreach (IStimulus stimulus in ToBePresented)
 		{
-			stimulusCoroutines.Add(StartCoroutine(stimulus.Stimulate()));
+			yield return stimulus.Stimulate();
 		}
-		throw new NotImplementedException();
 	}
 
 	// Unity setup functions are done in AbstractPresenter

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public interface IFixation {
 
+	IEnumerator RunFixation();
+
 	void ShowFixation();
 
 	IEnumerator ProgressFixation();

@@ -34,10 +34,11 @@ public class ExperimentConfig : MonoBehaviour {
 		{
 			if (instance == this)
 			{
-				return;
+				Debug.Log("Instance of of ExperimentConfig already exists. Destroying this object.");
 			}
 			else
 			{
+				Debug.Log("Instance of of ExperimentConfig already exists. Destroying this object.");
 				Destroy(this);
 			}
 		}

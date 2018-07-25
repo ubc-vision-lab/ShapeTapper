@@ -203,7 +203,7 @@ namespace EnnsLab
 
 		protected void LoadStimulusGameObjects(List<string> stim_names)
 		{
-			Debug.Log("Loading Stimulus GameObjects...");
+			Debug.Log("Loading Stimulus " + eventNumber);
 			foreach (string stim_name in stim_names)
 			{
 				Debug.Log("Adding " + stim_name);

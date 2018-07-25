@@ -51,6 +51,7 @@ public class MATLABclient : MonoBehaviour {
 
 		try
 		{
+			Debug.Log("Connect to matlab");
 			socket = new TcpClient(host, port);
 			stream = socket.GetStream();
 			writer = new StreamWriter(stream);
@@ -58,6 +59,7 @@ public class MATLABclient : MonoBehaviour {
 			SocketReady = true;
 			SetStatusConnected();
 			SendData(PlayerPrefs.GetString("UserID", ""));
+			Debug.Log("Connected");
 			Debug.Log("MATLABclient started.");
 		}
 		catch(Exception e)
@@ -91,11 +93,9 @@ public class MATLABclient : MonoBehaviour {
 		}
 		else
 		{
-			Debug.Log("Connect to matlab");
-			this.ConnectToMatlab();
+			ConnectToMatlab();
 			instance = this;
 			DontDestroyOnLoad(this);
-			Debug.Log("Connected");
 		}
 	}
 	// Use this for initialization
