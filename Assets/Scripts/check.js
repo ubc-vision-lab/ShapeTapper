@@ -1,10 +1,11 @@
 ﻿#pragma strict
 import System.IO;
+import System.Collections.Generic;
 
 private var test : GameObject;
 private var guiOn : int;
 public var startSkin : GUIStyle;
-private var fileLines : Array;
+private var fileLines : List.<String>;
 
 private var txtPath : String;
 private var assetPath : String;
@@ -60,7 +61,7 @@ function masterChecker(configName){
 	error_msg = '';
 	startSkin.fontSize = Screen.width/17;
 	guiOn = 0;
-	fileLines = new Array();
+	fileLines = new List.<String>();
 	txtPath = Application.persistentDataPath+'/'+configName;
 	assetPath = Application.persistentDataPath+"/images";
 	print("Persistent datapath:" + Application.persistentDataPath);
@@ -74,8 +75,8 @@ function masterChecker(configName){
 		}
 		else{
 			var assets = AssetBundle.LoadFromFile(assetPath);
-			for(var i=0; i < fileLines.length; i++){
-				var mySpec : String = fileLines[i];
+			for(var i=0; i < fileLines.Count; i++){
+				var mySpec : String = fileLines[i] as String;
 				var specs = mySpec.Split(","[0]);
 				if(!CheckImages(specs, assets)){
 					guiOn = 4;
@@ -94,7 +95,7 @@ function masterChecker(configName){
 	}
 }
 
-function CheckImages(specs:Array,assets:AssetBundle) {
+function CheckImages(specs:String[],assets:AssetBundle) {
 	var image_numbers = [7,8,9,10,11,12,17,25,33]; //dyn_mask images 1-5 and E1-3 images             /////// DEPENDENT ON CONFIG FILE LAYOUT
 	// every trial, three events
 	// event = thing that pops up
@@ -158,7 +159,7 @@ function ReadFile() {
         while (true) {
             line1 = sr.ReadLine();
             if (line1 == null) {break;}
-            fileLines.Push(line1);
+            fileLines.Add(line1);
         }
         sr.Close();
 

@@ -1,5 +1,6 @@
 ﻿#pragma strict
 import System.IO;
+import System.Collections.Generic;
 
 public var startSkin: GUIStyle;
 private var badflag: int;
@@ -7,14 +8,14 @@ private var badtouch: int;
 private var block: int;
 private var line: int;
 private var time: int;
-private var fileLines: Array;
-private var specs: String[];
+private var fileLines: List.<String>;
+private var specs: List.<String>;
 private var mySpec: String;
 private var screenHeight: float;
 private var screenWidth: float;
 
 
-private var mask: Array;
+private var mask: List.<GameObject>;
 
 private var mask1: GameObject;
 private var mask2: GameObject;
@@ -117,14 +118,14 @@ function Start() {
 	time = 0;
 	clickable = false; // controls if you can tap or not - set to true when target is 1
 	line = PlayerPrefs.GetInt("line", 0); // line number in config file - increments for trial number (essentially)
-	fileLines = new Array();
-	mask = new Array();
+	fileLines = new List.<String>();
+	mask = new List.<GameObject>();
 	ReadFile();
-	if (line >= fileLines.length) { // more trials so you're done the whole experiment woooooo
+	if (line >= fileLines.Count) { // more trials so you're done the whole experiment woooooo
 		going(9); // goes to end.js? probably maybe, definitely starts process for ending game/experiment i guess - Paul 2017
 	}
 	mySpec = fileLines[line];
-	specs = mySpec.Split("," [0]);
+	specs = new List.<String>(mySpec.Split("," [0]));
 	var block_num = int.Parse(specs[0]); ////// DEPENDENT ON CONFIG FILE LAYOUT
 
 	assign_specs(specs);
@@ -235,7 +236,7 @@ function ReadFile() {
 			if (line1 == null) {
 				break;
 			}
-			fileLines.Push(line1);
+			fileLines.Add(line1);
 		}
 		sr.Close();
 
@@ -260,32 +261,32 @@ function MakeImages() {
 	}
 
 	if (dyn_mask1 != "") {
-		mask1 = Instantiate(assets.LoadAsset(dyn_mask1));
+		mask1 = Instantiate(assets.LoadAsset(dyn_mask1)) as GameObject;
 		Scale(mask1, mrotation, msafety);
-		mask.Push(mask1);
+		mask.Add(mask1);
 		if (dyn_mask2 != "") {
-			mask2 = Instantiate(assets.LoadAsset(dyn_mask2));
+			mask2 = Instantiate(assets.LoadAsset(dyn_mask2)) as GameObject;
 			Scale(mask2, mrotation, msafety);
-			mask.Push(mask2);
+			mask.Add(mask2);
 			if (dyn_mask3 != "") {
-				mask3 = Instantiate(assets.LoadAsset(dyn_mask3));
+				mask3 = Instantiate(assets.LoadAsset(dyn_mask3)) as GameObject;
 				Scale(mask3, mrotation, msafety);
-				mask.Push(mask3);
+				mask.Add(mask3);
 				if (dyn_mask4 != "") {
-					mask4 = Instantiate(assets.LoadAsset(dyn_mask4));
+					mask4 = Instantiate(assets.LoadAsset(dyn_mask4)) as GameObject;
 					Scale(mask4, mrotation, msafety);
-					mask.Push(mask4);
+					mask.Add(mask4);
 					if (dyn_mask5 != "") {
-						mask5 = Instantiate(assets.LoadAsset(dyn_mask5));
+						mask5 = Instantiate(assets.LoadAsset(dyn_mask5)) as GameObject;
 						Scale(mask5, mrotation, msafety);
-						mask.Push(mask5);
+						mask.Add(mask5);
 					}
 				}
 			}
 		}
 	}
 	if (e1_image != "") {
-		event1 = Instantiate(assets.LoadAsset(e1_image));
+		event1 = Instantiate(assets.LoadAsset(e1_image)) as GameObject;
 		if (oddball_flag) {
 			Rescale(event1, rotation1, safety1, x_pos, y_pos);
 		} else {
@@ -293,7 +294,7 @@ function MakeImages() {
 		}
 	}
 	if (e2_image != "") {
-		event2 = Instantiate(assets.LoadAsset(e2_image));
+		event2 = Instantiate(assets.LoadAsset(e2_image)) as GameObject;
 		if (oddball_flag) {
 			Rescale(event2, rotation2, safety2, x_pos2, y_pos2);
 		} else {
@@ -301,7 +302,7 @@ function MakeImages() {
 		}
 	}
 	if (e3_image != "") {
-		event3 = Instantiate(assets.LoadAsset(e3_image));
+		event3 = Instantiate(assets.LoadAsset(e3_image)) as GameObject;
 		if (oddball_flag) {
 			Rescale(event3, rotation3, safety3, x_pos3, y_pos3);
 		} else {
@@ -311,7 +312,7 @@ function MakeImages() {
 
 	if (tooSlow_image != "") {
 		tooSlow_there = true;
-		tooSlow = Instantiate(assets.LoadAsset(tooSlow_image));
+		tooSlow = Instantiate(assets.LoadAsset(tooSlow_image)) as GameObject;
 
 		ScaleMask(tooSlow);
 	}
@@ -492,7 +493,7 @@ function Trial() {
 							temp = mask[dynamicIndex];
 							temp.GetComponent. < Renderer > ().enabled = false;
 							imgOn = image_on1;
-							dynamicIndex = ++dynamicIndex % mask.length; // this lets it repeat
+							dynamicIndex = ++dynamicIndex % mask.Count; // this lets it repeat
 							temp = mask[dynamicIndex];
 							temp.GetComponent. < Renderer > ().enabled = true;
 						}
@@ -538,7 +539,7 @@ function Trial() {
 							temp = mask[dynamicIndex];
 							temp.GetComponent. < Renderer > ().enabled = false;
 							imgOn = image_on2;
-							dynamicIndex = ++dynamicIndex % mask.length;
+							dynamicIndex = ++dynamicIndex % mask.Count;
 							temp = mask[dynamicIndex];
 							temp.GetComponent. < Renderer > ().enabled = true;
 						}
@@ -583,7 +584,7 @@ function Trial() {
 							temp = mask[dynamicIndex];
 							temp.GetComponent. < Renderer > ().enabled = false;
 							imgOn = image_on3;
-							dynamicIndex = ++dynamicIndex % mask.length;
+							dynamicIndex = ++dynamicIndex % mask.Count;
 							temp = mask[dynamicIndex];
 							temp.GetComponent. < Renderer > ().enabled = true;
 						}
@@ -665,7 +666,7 @@ function DoBad() {
 	for (var i = 0; i < bad.length; i++) {
 		AddBad(bad[i]);
 	}
-	specs = mySpec.Split("," [0]);
+	specs = new List.<String>(mySpec.Split("," [0]));
 
 	assign_specs(specs);
 
@@ -676,7 +677,7 @@ function DoBad() {
 	StartCoroutine("Trial");
 }
 
-function assign_specs(specs: Array) { ////// DEPENDENT ON CONFIG FILE LAYOUT
+function assign_specs(specs: List.<String>) { ////// DEPENDENT ON CONFIG FILE LAYOUT
 	// specs[0] is block number
 	trialno = specs[1];
 	feedback = int.Parse(specs[2]); // 1 or 0 - when you tap, you get a green flash for good, or red if you done goof'd

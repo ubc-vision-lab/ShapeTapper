@@ -4,11 +4,13 @@ using UnityEngine;
 
 public interface IFixation {
 
-	IEnumerator RunFixation();
+	void RunFixation();
 
 	void ShowFixation();
 
 	IEnumerator ProgressFixation();
 
 	void CompleteFixation();
+
+	void TerminateFixation();
 }

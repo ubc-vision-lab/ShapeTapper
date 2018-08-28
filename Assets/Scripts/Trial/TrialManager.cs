@@ -366,7 +366,7 @@ namespace EnnsLab
 					badTrials.Remove(badTrials[badtrial]);
 					string badTrialsArray = string.Join(";", badTrials.ToArray());
 					PlayerPrefs.SetString("bad", badTrialsArray);
-					trialEvents = current_trial_config.LoadStimuli(imageAssets);
+					//trialEvents = current_trial_config.LoadStimuli(imageAssets);
 				}
 				else if (Absolute_trial_number >= experimentConfigList.Count) // we're done with all the bad flags trials! Exit the block.
 				{
@@ -380,7 +380,7 @@ namespace EnnsLab
 			else // not in bad mode at the moment
 			{
 				current_trial_config = experimentConfig[Absolute_trial_number];
-				trialEvents = current_trial_config.LoadStimuli(imageAssets);
+				//trialEvents = current_trial_config.LoadStimuli(imageAssets);
 			}
 
 			// re-display home key, turn off images

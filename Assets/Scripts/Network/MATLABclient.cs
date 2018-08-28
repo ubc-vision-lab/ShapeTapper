@@ -112,12 +112,14 @@ public class MATLABclient : MonoBehaviour {
 
 	private void OnApplicationQuit()
 	{
-		MATLABclient.instance.SendExit();
+		if (MATLABclient.instance != null)
+		{
+			MATLABclient.instance.SendExit();
+		}
 	}
 
 	private void OnDestroy()
 	{
-		MATLABclient.instance.SendExit();
 	}
 	#endregion UnityEvents
 

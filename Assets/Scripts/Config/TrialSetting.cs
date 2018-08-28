@@ -77,6 +77,4 @@ namespace EnnsLab
 			flasher
 		}
 	}
-
-	
 }

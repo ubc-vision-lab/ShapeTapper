@@ -169,6 +169,7 @@ namespace EnnsLab
 		}
 		#endregion Properties
 
+		//TODO: Switch this to use a proper Unity-style initializer
 		public StimulusInfo(List<string> stimulusNames, bool is_target,
 			Vector2 position, float rotation, float scaling,
 			float display_interval, float interstimulus_time,

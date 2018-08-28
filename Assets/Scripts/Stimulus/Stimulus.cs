@@ -18,12 +18,14 @@ namespace EnnsLab
 		// maybe make the stimulusObject an arra instead.
 		private List<GameObject> stimulusObjects;
 		private GameObject mask; // TODO: Add the parsing for this
+		float mask_linger_time;
 		private float scale;
 		private float rotation;
 		private Vector3 position;
 		private float presentation_time;
 		private float onset_time;
 		private float total_time;
+		private bool isFinished = false;
 
 		private ExperimentConfig experimentConfig;
 
@@ -120,6 +122,12 @@ namespace EnnsLab
 			}
 		}
 
+		public float Mask_linger_time
+		{
+			get { return mask_linger_time; }
+			set { mask_linger_time = value; }
+		}
+
 		public List<GameObject> StimulusObjects
 		{
 			get
@@ -143,6 +151,19 @@ namespace EnnsLab
 			set
 			{
 				eventNumber = value;
+			}
+		}
+
+		public bool IsFinished
+		{
+			get
+			{
+				return isFinished;
+			}
+
+			set
+			{
+				isFinished = value;
 			}
 		}
 		#endregion
@@ -178,7 +199,8 @@ namespace EnnsLab
 		 * 
 		 */
 		public void SetupStimulus(List<string> stim_names, float sca,
-			float rot, float pos_x, float pos_y, float p_t, float o_t, float t_t)
+			float rot, float pos_x, float pos_y, float p_t, float o_t, float t_t,
+			string mask_name, float mask_linger_time)
 		{
 			Scale = sca;
 			Rotation = rot;
@@ -186,7 +208,9 @@ namespace EnnsLab
 			Presentation_time = p_t;
 			Onset_time = o_t;
 			Total_time = t_t;
+			Mask_linger_time = mask_linger_time;
 			LoadStimulusGameObjects(stim_names);
+			LoadMask(mask_name);
 			ResizeAll();
 		}
 
@@ -198,7 +222,8 @@ namespace EnnsLab
 		{
 			SetupStimulus(stim_info.StimulusNames, stim_info.Scaling, stim_info.Rotation,
 				stim_info.Position.x, stim_info.Position.y, stim_info.Display_interval,
-				0f, stim_info.Display_interval + stim_info.Interstimulus_time);
+				0f, stim_info.Display_interval + stim_info.Interstimulus_time,
+				stim_info.MaskName, stim_info.MaskLingerTime);
 		}
 
 		protected void LoadStimulusGameObjects(List<string> stim_names)
@@ -221,17 +246,60 @@ namespace EnnsLab
 			Debug.Log("Stimulus GameObjects Loaded");
 		}
 
+		protected void LoadMask(string mask_name)
+		{
+			if(mask_name != "")
+			{
+				Debug.Log("Loading stimulus " + eventNumber + "'s " + mask_name);
+				Mask = Instantiate(experimentConfig.assetBundle.LoadAsset<GameObject>(mask_name),
+					gameObject.transform);
+				Mask.GetComponent<Renderer>().enabled = false;
+			}
+			
+		}
+
 		public IEnumerator Stimulate()
 		{
 			yield return new WaitForSecondsRealtime(Onset_time);
 			float startTime = Time.time;
+			if(Mask != null)
+			{
+				Mask.GetComponent<Renderer>().enabled = true;
+			}
 			foreach (GameObject stimulusObject in StimulusObjects)
 			{
 				stimulusObject.GetComponent<Renderer>().enabled = true;
 				yield return new WaitForSecondsRealtime(Presentation_time);
 				stimulusObject.GetComponent<Renderer>().enabled = false;
 			}
+			if(Mask != null)
+			{
+				yield return new WaitForSecondsRealtime(Mask_linger_time);
+				Mask.GetComponent<Renderer>().enabled = false;
+				Debug.Log("Mask disabled.");
+			}
 			yield return new WaitForSecondsRealtime(Total_time - (Time.time - startTime));
+			IsFinished = true;
+		}
+
+		/// <summary>
+		/// Stop display of all stimuli
+		/// </summary>
+		public void Terminate()
+		{
+			foreach (GameObject stimulusObject in StimulusObjects)
+			{
+				stimulusObject.GetComponent<Renderer>().enabled = false;
+			}
+			if(Mask != null)
+			{
+				Mask.GetComponent<Renderer>().enabled = false;
+			}
+		}
+
+		public bool CoroutineIsFinished()
+		{
+			return IsFinished;
 		}
 
 
@@ -252,6 +320,7 @@ namespace EnnsLab
 			float margin_x = screenOrthoWidth - newImageDiag - border;
 			float margin_y = screenOrthoHeight - newImageDiag - border;
 
+			Vector3 stimulusPosition = new Vector3();
 			foreach (GameObject stimulusObject in StimulusObjects)
 			{
 				Renderer stimulusRenderer = stimulusObject.GetComponent<Renderer>();
@@ -264,10 +333,16 @@ namespace EnnsLab
 				stimulusObject.transform.localScale = new Vector3(scaleFactor, scaleFactor, 1);
 				stimulusObject.transform.position =
 					Vector3.Scale(Position, new Vector3(margin_x / 100f, margin_y / 100f));
-				stimulusObject.transform.position =
+				stimulusPosition =
 					stimulusObject.transform.position - new Vector3(margin_x / 2, margin_y / 2, 0);
+				stimulusObject.transform.position = stimulusPosition;
+					
 
 				stimulusObject.transform.eulerAngles = new Vector3(0, 0, Rotation);
+			}
+			if( Mask != null )
+			{
+				Mask.transform.position = stimulusPosition;
 			}
 		}
 
@@ -280,13 +355,13 @@ namespace EnnsLab
 			{
 				Debug.Log("No experiment configuration object found.");
 			}
+			SetupStimulus();
+			AbstractPresenter.ToBePresented.Add(this);
 		}
 
 		void OnEnable()
 		{
-			// needs to search for ExperimentConfig object
-			SetupStimulus();
-			AbstractPresenter.ToBePresented.Add(this);
+			//TODO: Add Terminate to some termination event in TrialDelegate
 		}
 		#endregion UnityLoop
 	}

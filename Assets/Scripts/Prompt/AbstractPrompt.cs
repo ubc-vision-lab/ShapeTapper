@@ -2,15 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AbstractPrompt : MonoBehaviour {
+public abstract class AbstractPrompt : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
+	[SerializeField] protected string promptType = "AbstractPrompt";
+
+	/// <summary>
+	/// Enable the prompter to accept input
+	/// </summary>
+	public abstract void Prompt();
+
+	/// <summary>
+	/// Disables the prompter. Any input that was made will be saved.
+	/// </summary>
+	public abstract void EndPrompt();
+
+	void OnEnable()
+	{
+		TrialDelegate.ReadyForPrompt += Prompt;
+		Debug.Log(promptType + " added to Trial.");
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+
+	private void OnDisable()
+	{
+		EndPrompt();
+		TrialDelegate.ReadyForPrompt -= Prompt;
+		Debug.Log(promptType + " removed from Trial.");
 	}
 }

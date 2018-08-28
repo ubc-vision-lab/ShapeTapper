@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -169,11 +168,9 @@ public class StreamFixation : MonoBehaviour, IFixation
 	#endregion
 
 	#region Interface Methods
-	public IEnumerator RunFixation()
+	public void RunFixation()
 	{
 		progressFixationCoroutine = StartCoroutine(ProgressFixation());
-		yield return progressFixationCoroutine;
-		CompleteFixation();
 	}
 
 	public void ShowFixation()
@@ -207,6 +204,15 @@ public class StreamFixation : MonoBehaviour, IFixation
 	public void CompleteFixation()
 	{
 		throw new NotImplementedException();
+	}
+
+	public void TerminateFixation()
+	{
+		if(progressFixationCoroutine != null)
+		{
+			StopCoroutine(progressFixationCoroutine);
+		}
+		_charStreamText.enabled = false;
 	}
 	#endregion Interface Methods
 
@@ -273,25 +279,4 @@ public class StreamFixation : MonoBehaviour, IFixation
 		
 	}
 	#endregion
-
-	#region Tests
-	[Test]
-	public void NoRepetitionsOfPreviousTwoChars()
-	{
-		int previousTwo = 2;
-		// TODO: Make the factory methods
-		StreamFixation streamFixation = new StreamFixation("KNVXZ",Vector3.zero,0.07f,0.1f);
-		streamFixation.MakeCharStream(previousTwo);
-		Queue<string> checkQueue = new Queue<string>();
-		foreach (string character in streamFixation.CharStream)
-		{
-			Assert.That(!checkQueue.Contains(character));
-			if(checkQueue.Count >= previousTwo)
-			{
-				checkQueue.Dequeue();
-			}
-			checkQueue.Enqueue(character);
-		}
-	}
-	#endregion Tests
 }

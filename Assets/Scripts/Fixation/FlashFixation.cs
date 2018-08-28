@@ -7,19 +7,35 @@ public class FlashFixation : MonoBehaviour, IFixation {
 
 	[SerializeField] GameObject fixationCross;
 	GameObject targetFlash;
-	TrialDelegate trialDelegate;
+	[SerializeField] TrialDelegate trialDelegate;
+	Coroutine progressFixationCoroutine;
 	float waitTime;
-	readonly float flashTime = 0.03f; // two frames
+	[SerializeField] float flashTime = 0.05f; // three frames @ 60fps
+	[SerializeField] float preStimulusTime = 0.1f;
+
+	bool fixationComplete = false;
+
+	public bool FixationComplete
+	{
+		get
+		{
+			return fixationComplete;
+		}
+
+		set
+		{
+			fixationComplete = value;
+		}
+	}
 
 	#region Unity functions
 	private void Awake()
 	{
 		var assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
 		var trialSetting = ExperimentConfig.instance.GetCurrentConfig().TrialSetting;
-		trialDelegate = FindObjectOfType<TrialDelegate>();
-		targetFlash = Instantiate(assetBundle.LoadAsset<GameObject>(ExperimentConfig.instance.GetCurrentConfig().GetTargetName()));
-		targetFlash.GetComponent<Renderer>().transform.position = fixationCross.GetComponent<Renderer>().transform.position;
+		targetFlash = Instantiate(assetBundle.LoadAsset<GameObject>(ExperimentConfig.instance.GetCurrentConfig().GetTargetName()), fixationCross.transform);
 		targetFlash.GetComponent<Renderer>().enabled = false;
+		targetFlash.GetComponent<Transform>().localPosition = new Vector3(0, 0, 1);
 		waitTime = trialSetting._stimulus_onset;
 	}
 
@@ -27,6 +43,7 @@ public class FlashFixation : MonoBehaviour, IFixation {
 	{
 		TrialDelegate.ReadyToStartTrial += RunFixation;
 		trialDelegate.FixationReady();
+		TrialDelegate.ReadyForFeedback += TerminateFixation;
 	}
 
 	// Use this for initialization
@@ -38,32 +55,46 @@ public class FlashFixation : MonoBehaviour, IFixation {
 	void OnDisable()
 	{
 		TrialDelegate.ReadyToStartTrial -= RunFixation;
+		TrialDelegate.ReadyForFeedback -= TerminateFixation;
 	}
 	#endregion
 
-	public IEnumerator RunFixation()
+	public void RunFixation()
 	{
-		yield return ProgressFixation();
-		CompleteFixation();
+		Debug.Log("FlashFixation.RunFixation");
+		progressFixationCoroutine = StartCoroutine(ProgressFixation());
 	}
 
 	public void ShowFixation()
 	{
+		Debug.Log("FlashFixation.ShowFixation");
 		fixationCross.GetComponent<Renderer>().enabled = true;
 	}
 
 	public IEnumerator ProgressFixation()
 	{
+		Debug.Log("FlashFixation.ProgressFixation");
 		yield return new WaitForSecondsRealtime(waitTime);
+		Debug.Log("Flashing Fixation");
 		fixationCross.GetComponent<Renderer>().enabled = false;
 		targetFlash.GetComponent<Renderer>().enabled = true;
 		yield return new WaitForSecondsRealtime(flashTime);
+		Debug.Log("Fixation Flashed. Sending command to present Stimuli.");
 		targetFlash.GetComponent<Renderer>().enabled = false;
+		yield return new WaitForSecondsRealtime(preStimulusTime);
 		trialDelegate.OnReadyToPresentStimuli();
 	}
 
 	public void CompleteFixation()
 	{
+		FixationComplete = true;
+	}
 
+	public void TerminateFixation()
+	{
+		if(progressFixationCoroutine != null)
+		{
+			StopCoroutine(progressFixationCoroutine);
+		}
 	}
 }

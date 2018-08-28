@@ -12,11 +12,11 @@ public var handSkin : GUIStyle;
 public var ageSkin : GUIStyle;
 public var submitSkin : GUIStyle;
 
-var m : Texture;
-var f : Texture;
-var r : Texture;
-var l : Texture;
-var submit : Texture;
+var m : Texture2D;
+var f : Texture2D;
+var r : Texture2D;
+var l : Texture2D;
+var submit : Texture2D;
 
 function Start () {
 	scale = Screen.height/6;

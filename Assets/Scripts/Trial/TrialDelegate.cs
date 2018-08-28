@@ -7,12 +7,14 @@ using UnityEngine.SceneManagement;
 
 public class TrialDelegate : MonoBehaviour {
 
-	public delegate IEnumerator TrialEvent();
+	public delegate void TrialEvent();
 
 	public static event TrialEvent ReadyToStartTrial;
 	public static event TrialEvent ReadyToPresentStimuli;
 	public static event TrialEvent ReadyToPresentConditionalStimuli;
 	public static event TrialEvent ReadyForPrompt;
+	public static event TrialEvent ReadyForFeedback;
+	public static event TrialEvent ReadyForEndTrial;
 
 	// Setup checks
 	private bool fixationReady = false;
@@ -23,8 +25,12 @@ public class TrialDelegate : MonoBehaviour {
 	private bool triggerReady = false;
 	private bool trialStarted = false;
 
-	public AbstractPresenter fixation;
-	public AbstractPrompt prompt;
+	AbstractPresenter fixation;
+	AbstractPrompt prompt;
+	TrialStateTracker stateTracker;
+
+	// TODO: Needs more abstraction
+	[SerializeField] DataRecorder dataRecorder;
 
 	#region Fields
 	private AbstractPresenter _trialFixation;
@@ -121,15 +127,24 @@ public class TrialDelegate : MonoBehaviour {
 	{
 		if (ReadyToStartTrial == null)
 		{
-		} else ReadyToStartTrial.Invoke();
+		}
+		else
+		{
+			ReadyToStartTrial.Invoke();
+		}
 	}
 
 	public void OnReadyToPresentStimuli()
 	{
 		if (ReadyToPresentStimuli == null)
 		{
+			Debug.Log("ReadyToPresentStimuli is empty.");
 		}
-		else ReadyToPresentStimuli.Invoke();
+		else
+		{
+			Debug.Log("ReadyToPresentStimuli.Invoke");
+			ReadyToPresentStimuli.Invoke();
+		}
 	}
 
 	public void OnReadyToPresentConditionalStimuli()
@@ -148,12 +163,51 @@ public class TrialDelegate : MonoBehaviour {
 		else ReadyForPrompt.Invoke();
 	}
 
+	public void OnReadyForFeedback()
+	{
+		if (ReadyForFeedback == null)
+		{
+
+		}
+		else ReadyForFeedback.Invoke();
+		Debug.Log("ReadyForFeedback");
+	}
+	
+	public void OnReadyToEndTrial()
+	{
+		if (ReadyForEndTrial == null)
+		{
+
+		}
+		else ReadyForEndTrial.Invoke();
+		Debug.Log("ReadyToEndTrial");
+		AdvanceTrial();
+	}
+
 	private void ExitBlock(int flag)
 	{
 		PlayerPrefs.SetInt("badflag", 0);
 		PlayerPrefs.SetInt("exit_flag", flag);
 		PlayerPrefs.SetInt("lastBlockLine", PlayerPrefs.GetInt("line", 0));
 		SceneManager.LoadScene("End");
+	}
+
+	private void AdvanceTrial()
+	{
+		// use a serializable object to pass data between objects!
+		var trialStateTracker = FindObjectOfType<TrialStateTracker>();
+		if (trialStateTracker != null)
+		{
+			// check the state
+			if (trialStateTracker.IsValidTrial())
+			{
+				// add the current trial to the bad pool;
+			}
+			else
+			{
+				PlayerPrefs.SetInt("line", PlayerPrefs.GetInt("line", 0)+1);
+			}
+		}
 	}
 
 	#region Trial Ready functions

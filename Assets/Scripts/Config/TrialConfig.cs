@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -10,7 +9,7 @@ namespace EnnsLab
 	/* The TrialConfig for ShapeSpider.
 	 * All column headers are saved as an enum ConfigIndex below.
 	 */
-	public class TrialConfig : ScriptableObject
+	public class TrialConfig
 	{
 		private List<string> config;
 		private TrialSetting trialSetting;
@@ -58,6 +57,11 @@ namespace EnnsLab
 					(int)ConfigIndex.e3_dyn_mask_time
 				}
 			};
+
+		internal string TrialNumber()
+		{
+			return Config[(int)ConfigIndex.trial];
+		}
 
 		#region Properties
 		public List<string> Config
@@ -148,9 +152,9 @@ namespace EnnsLab
 				config[(int)ConfigIndex.too_slow_image],
 				int.Parse(config[(int)ConfigIndex.experiment_mode]),
 				int.Parse(config[(int)ConfigIndex.ask_for_target]),
-                float.Parse(config[(int)ConfigIndex.stimulus_onset]),
-                int.Parse(config[(int)ConfigIndex.loop_trial])==1
-                );
+				float.Parse(config[(int)ConfigIndex.stimulus_onset]),
+				int.Parse(config[(int)ConfigIndex.loop_trial])==1
+				);
 		}
 
 		/*
@@ -198,16 +202,24 @@ namespace EnnsLab
 					float rotation = float.Parse(config[stimuliIdcs[i, 4]]);
 					float scaling = float.Parse(config[stimuliIdcs[i, 5]]);
 					float display_interval = float.Parse(config[stimuliIdcs[i, 6]]);
-					float interstimulus_time = float.Parse(config[stimuliIdcs[i, 7]]);
+					float interstimulus_time =
+						(stimuliIdcs[i, 7] != -1) ? float.Parse(config[stimuliIdcs[i, 7]]) : 0f;
 
 					float dyn_mask_time = float.Parse(config[stimuliIdcs[i, 9]]);
 
-					events.Add(new StimulusInfo(eventNames, is_target, position, rotation, scaling, display_interval, interstimulus_time, is_dyn_mask, dyn_mask_time));
+					string mask_name = config[(int)ConfigIndex.mask_name];
+
+					if (mask_name != "")
+					{
+						events.Add(new StimulusInfo(eventNames, is_target, position, rotation, scaling, display_interval, interstimulus_time, is_dyn_mask, dyn_mask_time, mask_name,float.Parse(config[(int)ConfigIndex.mask_linger_time])));
+					} else
+					{
+						events.Add(new StimulusInfo(eventNames, is_target, position, rotation, scaling, display_interval, interstimulus_time, is_dyn_mask, dyn_mask_time));
+					}
 				}
 			}
 			return events;
 		}
-
 		public string GetTargetName()
 		{
 			if(stimulusData.Count <= 0)
@@ -224,90 +236,72 @@ namespace EnnsLab
 			return "";
 		}
 
-		#region Tests
-		[Test]
-		void ThreeStimuliTest() {
-			string testConfigLine = "1,1,0,1,0,1,60,,,,,,,1,26,68,1,blake_12,252,40,1,0,60,0,0,blake_06,342,40,0,0,60,0,0,blake_06,306,40,0,0,60,0,1,95,88,51,16";
-			string[] splitTestConfigLine = testConfigLine.Split(',');
-			TrialConfig testConfig = new TrialConfig(testConfigLine);
-			List<string> expectedStim1Names = new List<string>();
-			expectedStim1Names.Add(splitTestConfigLine[(int)ConfigIndex.e1_image]);
-			List<string> expectedStim2Names = new List<string>();
-
-
-			expectedStim1Names.Add(splitTestConfigLine[(int)ConfigIndex.e2_image]);
-			List<string> expectedStim3Names = new List<string>();
-			expectedStim1Names.Add(splitTestConfigLine[(int)ConfigIndex.e3_image]);
-			// StimulusInfo expectedStim1 = new StimulusInfo(expectedStim1Names,)
-		}
-		#endregion Tests
-
 		#region Legacy Code
 		// Legacy code, to be deprecated
-		public List<GameObject> LoadStimuli(AssetBundle assets)
-		{
-			List<GameObject> stimuli = new List<GameObject>();
-			string event1_name = Config[(int)ConfigIndex.e1_image];
-			string event2_name = Config[(int)ConfigIndex.e2_image];
-			string event3_name = Config[(int)ConfigIndex.e3_image];
-			if (event1_name != "")
-			{
-				GameObject stimulus1 = Instantiate<GameObject>(assets.LoadAsset<GameObject>(event1_name));
-				stimulus1.GetComponent<Renderer>().enabled = false;
-				stimuli.Add(ScaleStimulus(stimulus1,
-					float.Parse(Config[(int)ConfigIndex.e1_rotation]),
-					float.Parse(Config[(int)ConfigIndex.e1_scaling]),
-					float.Parse(Config[(int)ConfigIndex.e1_x_pos]),
-					float.Parse(Config[(int)ConfigIndex.e1_y_pos])));
-			}
-			if (event2_name != "")
-			{
-				GameObject stimulus2 = Instantiate<GameObject>(assets.LoadAsset<GameObject>(event2_name));
-				stimulus2.GetComponent<Renderer>().enabled = false;
-				stimuli.Add(ScaleStimulus(stimulus2,
-					float.Parse(Config[(int)ConfigIndex.e2_rotation]),
-					float.Parse(Config[(int)ConfigIndex.e2_scaling]),
-					float.Parse(Config[(int)ConfigIndex.e2_x_pos]),
-					float.Parse(Config[(int)ConfigIndex.e2_y_pos])));
-			}
-			if (event3_name != "")
-			{
-				GameObject stimulus3 = Instantiate<GameObject>(assets.LoadAsset<GameObject>(event3_name));
-				stimulus3.GetComponent<Renderer>().enabled = false;
-				stimuli.Add(ScaleStimulus(stimulus3,
-					float.Parse(Config[(int)ConfigIndex.e3_rotation]),
-					float.Parse(Config[(int)ConfigIndex.e3_scaling]),
-					float.Parse(Config[(int)ConfigIndex.e3_x_pos]),
-					float.Parse(Config[(int)ConfigIndex.e3_y_pos])));
-			}
-			return stimuli;
-		}
+		//public list<gameobject> loadstimuli(assetbundle assets)
+		//{
+		//	list<gameobject> stimuli = new list<gameobject>();
+		//	string event1_name = config[(int)configindex.e1_image];
+		//	string event2_name = config[(int)configindex.e2_image];
+		//	string event3_name = config[(int)configindex.e3_image];
+		//	if (event1_name != "")
+		//	{
+		//		gameobject stimulus1 = instantiate<gameobject>(assets.loadasset<gameobject>(event1_name));
+		//		stimulus1.getcomponent<renderer>().enabled = false;
+		//		stimuli.add(scalestimulus(stimulus1,
+		//			float.parse(config[(int)configindex.e1_rotation]),
+		//			float.parse(config[(int)configindex.e1_scaling]),
+		//			float.parse(config[(int)configindex.e1_x_pos]),
+		//			float.parse(config[(int)configindex.e1_y_pos])));
+		//	}
+		//	if (event2_name != "")
+		//	{
+		//		gameobject stimulus2 = instantiate<gameobject>(assets.loadasset<gameobject>(event2_name));
+		//		stimulus2.getcomponent<renderer>().enabled = false;
+		//		stimuli.add(scalestimulus(stimulus2,
+		//			float.parse(config[(int)configindex.e2_rotation]),
+		//			float.parse(config[(int)configindex.e2_scaling]),
+		//			float.parse(config[(int)configindex.e2_x_pos]),
+		//			float.parse(config[(int)configindex.e2_y_pos])));
+		//	}
+		//	if (event3_name != "")
+		//	{
+		//		gameobject stimulus3 = instantiate<gameobject>(assets.loadasset<gameobject>(event3_name));
+		//		stimulus3.getcomponent<renderer>().enabled = false;
+		//		stimuli.add(scalestimulus(stimulus3,
+		//			float.parse(config[(int)configindex.e3_rotation]),
+		//			float.parse(config[(int)configindex.e3_scaling]),
+		//			float.parse(config[(int)configindex.e3_x_pos]),
+		//			float.parse(config[(int)configindex.e3_y_pos])));
+		//	}
+		//	return stimuli;
+		//}
 
-		// Legacy code, to be deprecated
-		public GameObject ScaleStimulus(GameObject stimulus, float rotation, float scaling, float x_pos, float y_pos)
-		{
-			Renderer stimulusRenderer = stimulus.GetComponent<Renderer>();
-			stimulusRenderer.enabled = false;
-			float screenHeight = 2f * Camera.main.orthographicSize;
-			float screenWidth = screenHeight * Camera.main.aspect;
-			float newImageDiag = screenHeight * scaling / 100;
-			//float maxImageWidth = screenWidth * scale / 100;
+		//// legacy code, to be deprecated
+		//public gameobject scalestimulus(gameobject stimulus, float rotation, float scaling, float x_pos, float y_pos)
+		//{
+		//	renderer stimulusrenderer = stimulus.getcomponent<renderer>();
+		//	stimulusrenderer.enabled = false;
+		//	float screenheight = 2f * camera.main.orthographicsize;
+		//	float screenwidth = screenheight * camera.main.aspect;
+		//	float newimagediag = screenheight * scaling / 100;
+		//	//float maximagewidth = screenwidth * scale / 100;
 
-			// Resize the stimulus to the screen
-			Vector2 img_dim = new Vector2(stimulusRenderer.bounds.size.x, stimulusRenderer.bounds.size.y);
-			float diag = img_dim.magnitude;
-			float scaleFactor = diag / newImageDiag;
-			stimulus.transform.localScale = new Vector3(1 / scaleFactor, 1 / scaleFactor, 1);
+		//	// resize the stimulus to the screen
+		//	vector2 img_dim = new vector2(stimulusrenderer.bounds.size.x, stimulusrenderer.bounds.size.y);
+		//	float diag = img_dim.magnitude;
+		//	float scalefactor = diag / newimagediag;
+		//	stimulus.transform.localscale = new vector3(1 / scalefactor, 1 / scalefactor, 1);
 
-			float pixelOrthoRatio = Screen.height / 2f / Camera.main.orthographicSize;
-			float border = 3 * Screen.dpi / pixelOrthoRatio / 8; // 3/8ths of an inch on the edges
-			float margin_x = screenWidth - newImageDiag - border;
-			float margin_y = screenHeight - newImageDiag - border;
-			stimulus.transform.position = new Vector3(x_pos / 100f * margin_x - (margin_x / 2), y_pos / 100f * margin_y - (margin_y / 2));
+		//	float pixelorthoratio = screen.height / 2f / camera.main.orthographicsize;
+		//	float border = 3 * screen.dpi / pixelorthoratio / 8; // 3/8ths of an inch on the edges
+		//	float margin_x = screenwidth - newimagediag - border;
+		//	float margin_y = screenheight - newimagediag - border;
+		//	stimulus.transform.position = new vector3(x_pos / 100f * margin_x - (margin_x / 2), y_pos / 100f * margin_y - (margin_y / 2));
 
-			stimulus.transform.eulerAngles = new Vector3(0, 0, rotation);
-			return stimulus;
-		}
+		//	stimulus.transform.eulerangles = new vector3(0, 0, rotation);
+		//	return stimulus;
+		//}
 		#endregion Legacy Code
 	}
 }

@@ -5,4 +5,8 @@ using UnityEngine;
 public interface IStimulus {
 
 	IEnumerator Stimulate();
+
+	void Terminate();
+
+	bool CoroutineIsFinished();
 }

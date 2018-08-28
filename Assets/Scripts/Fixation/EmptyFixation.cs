@@ -14,7 +14,6 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	void Awake()
 	{
 		fixationManager = gameObject.GetComponentInParent<FixationManager>();
-		var assetBundle = GameObject.FindObjectOfType<ExperimentConfig>().assetBundle;
 		try
 		{
 			var trialSetting = ExperimentConfig.instance.GetCurrentConfig().TrialSetting;
@@ -31,7 +30,6 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	{
 		Debug.Log("Trial uses Empty Fixation.");
 		Debug.Log("Trial to start in " + trialOnset + " seconds.");
-
 	}
 
 	// Use this for initialization
@@ -42,10 +40,9 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	void Update () {
 	}
 
-	public IEnumerator RunFixation()
+	public void RunFixation()
 	{
 		progressFixationCoroutine = StartCoroutine(ProgressFixation());
-		yield return progressFixationCoroutine;
 	}
 
 	/// <summary>
@@ -63,12 +60,20 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	/// <returns></returns>
 	public IEnumerator ProgressFixation()
 	{
-		Debug.Log("EmptyFixation.ProgressFixation");
-		progressFixationComplete = false;
-		yield return new WaitForSecondsRealtime(trialOnset);
-		fixationManager.OnPrimary();
-		progressFixationComplete = true;
-		CompleteFixation();
+		if(progressFixationComplete)
+		{
+			Debug.Log("ProgressFixation already run once! Not running again =.=");
+			yield return null;
+		}
+		else
+		{
+			Debug.Log("EmptyFixation.ProgressFixation");
+			progressFixationComplete = false;
+			yield return new WaitForSecondsRealtime(trialOnset);
+			fixationManager.OnPrimary();
+			progressFixationComplete = true;
+			CompleteFixation();
+		}
 	}
 
 	/// <summary>
@@ -78,5 +83,13 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	{
 		Debug.Log("EmptyFixation.CompleteFixation");
 		// nothing happens here also
+	}
+
+	public void TerminateFixation()
+	{
+		if(progressFixationCoroutine != null)
+		{
+			StopCoroutine(progressFixationCoroutine);
+		}
 	}
 }
