@@ -6,10 +6,9 @@ using UnityEngine;
 [RequireComponent(typeof(TrialDelegate))]
 public class TrialStateTracker : MonoBehaviour, IDataCollector {
 
-	TrialDelegate trialDelegate;
-	List<string> messages;
-	MATLABclient mATLABclient; // this name looks bad and you should feel bad :(
-	bool isValidTrial;
+	List<string> messages = new List<string>();
+	MATLABclient mATLABclient; // this name looks bad XD
+	bool isValidTrial = true;
 
 	[SerializeField] MessageLookup mATLABMessageDictionary;
 
@@ -35,7 +34,7 @@ public class TrialStateTracker : MonoBehaviour, IDataCollector {
 	// IDataCollector methods
 	public string DataHeaders()
 	{
-		return "Trial Errors";
+		return "trial_errors";
 	}
 
 	public string Data()
@@ -46,5 +45,10 @@ public class TrialStateTracker : MonoBehaviour, IDataCollector {
 	public bool IsValidTrial()
 	{
 		return isValidTrial;
+	}
+
+	public void SetBadTrial()
+	{
+		isValidTrial = false;
 	}
 }

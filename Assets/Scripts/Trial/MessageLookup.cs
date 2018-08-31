@@ -7,8 +7,7 @@ using UnityEngine;
 public class MessageLookup : ScriptableObject {
 
 	// As per the 
-	[SerializeField] List<string> networkMessages;
-	[SerializeField] List<string> associatedMeanings;
+	[SerializeField] List<MessagePair> networkMessages;
 
 	Dictionary<string, string> messageDictionary;
 
@@ -23,11 +22,5 @@ public class MessageLookup : ScriptableObject {
 		{
 			messageDictionary = value;
 		}
-	}
-
-	private void Awake()
-	{
-		MessageDictionary = networkMessages.Zip(associatedMeanings, (k, v) => new { k, v }).
-			ToDictionary(x => x.k, x => x.v);
 	}
 }

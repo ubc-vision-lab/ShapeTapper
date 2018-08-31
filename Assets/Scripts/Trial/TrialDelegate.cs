@@ -31,6 +31,8 @@ public class TrialDelegate : MonoBehaviour {
 
 	// TODO: Needs more abstraction
 	[SerializeField] DataRecorder dataRecorder;
+	[SerializeField] MessagePair RestartMessage;
+	[SerializeField] MessagePair FixationMessage;
 
 	#region Fields
 	private AbstractPresenter _trialFixation;
@@ -118,6 +120,16 @@ public class TrialDelegate : MonoBehaviour {
 		}
 	}
 
+	private void OnDestroy()
+	{
+		ReadyToStartTrial = null;
+		ReadyToPresentStimuli = null;
+		ReadyToPresentConditionalStimuli = null;
+		ReadyForPrompt = null;
+		ReadyForFeedback = null;
+		ReadyForEndTrial = null;
+	}
+
 	public void AbortTrial(string message)
 	{
 
@@ -125,10 +137,7 @@ public class TrialDelegate : MonoBehaviour {
 
 	public void OnReadyToStartTrial()
 	{
-		if (ReadyToStartTrial == null)
-		{
-		}
-		else
+		if (ReadyToStartTrial != null)
 		{
 			ReadyToStartTrial.Invoke();
 		}
@@ -181,7 +190,7 @@ public class TrialDelegate : MonoBehaviour {
 		}
 		else ReadyForEndTrial.Invoke();
 		Debug.Log("ReadyToEndTrial");
-		AdvanceTrial();
+		ExperimentConfig.instance.AdvanceTrial();
 	}
 
 	private void ExitBlock(int flag)
@@ -192,21 +201,16 @@ public class TrialDelegate : MonoBehaviour {
 		SceneManager.LoadScene("End");
 	}
 
-	private void AdvanceTrial()
+	private void EnableNetworkListener()
 	{
-		// use a serializable object to pass data between objects!
-		var trialStateTracker = FindObjectOfType<TrialStateTracker>();
-		if (trialStateTracker != null)
+	}
+
+	private void OnMessageReceivedDuringTrial(string message)
+	{
+		if(message == RestartMessage.message)
 		{
-			// check the state
-			if (trialStateTracker.IsValidTrial())
-			{
-				// add the current trial to the bad pool;
-			}
-			else
-			{
-				PlayerPrefs.SetInt("line", PlayerPrefs.GetInt("line", 0)+1);
-			}
+			// this was a bad trial!
+			OnReadyForFeedback();
 		}
 	}
 

@@ -114,6 +114,7 @@ public class DataRecorder : MonoBehaviour {
 	{
 		TrialDelegate.ReadyForFeedback -= SaveTrialData;
 		streamWriter?.Close();
+		streamWriter?.Dispose();
 	}
 
 	private void Awake()

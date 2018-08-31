@@ -30,6 +30,12 @@ public class EmptyFixation : MonoBehaviour, IFixation
 	{
 		Debug.Log("Trial uses Empty Fixation.");
 		Debug.Log("Trial to start in " + trialOnset + " seconds.");
+		TrialDelegate.ReadyToStartTrial += RunFixation;
+	}
+
+	void OnDisable()
+	{
+		TrialDelegate.ReadyToStartTrial -= RunFixation;
 	}
 
 	// Use this for initialization

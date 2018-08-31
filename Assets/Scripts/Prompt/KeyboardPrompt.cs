@@ -7,7 +7,7 @@ public class KeyboardPrompt : AbstractPrompt, IDataCollector {
 
 	[SerializeField] List<KeyCode> keyCodes;
 	bool listeningForKeyboard = false;
-	KeyCode response;
+	string response;
 	SpriteRenderer promptImageRenderer;
 	TrialDelegate trialDelegate;
 
@@ -31,7 +31,7 @@ public class KeyboardPrompt : AbstractPrompt, IDataCollector {
 
 	public string Data()
 	{
-		return response.ToString();
+		return response;
 	}
 
 	private void Awake()
@@ -54,11 +54,10 @@ public class KeyboardPrompt : AbstractPrompt, IDataCollector {
 			{
 				if(Input.GetKeyDown(keyCode))
 				{
-					PlayerPrefs.SetString("", keyCode.ToString());
 					Debug.Log(keyCode.ToString() + "was pressed!");
 					EndPrompt();
 					trialDelegate.OnReadyForFeedback();
-					response = keyCode;
+					response = keyCode.ToString();
 				}
 			}
 		}

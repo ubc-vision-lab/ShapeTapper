@@ -233,14 +233,18 @@ namespace EnnsLab
 			{
 				Debug.Log("Adding " + stim_name);
 				// formatting?
-				StimulusObjects.Add(
-					Instantiate(
+				GameObject stimulusObject = Instantiate(
 						experimentConfig
 							.assetBundle
 							.LoadAsset<GameObject>(stim_name),
 						gameObject.transform
-					)
-				);
+					);
+				if(stimulusObject == null)
+				{
+					Debug.Log("Resultant stimulus null. Not added to list.");
+					continue;
+				}
+				StimulusObjects.Add(stimulusObject);
 				Debug.Log("Added " + stim_name);
 			}
 			Debug.Log("Stimulus GameObjects Loaded");
@@ -268,6 +272,7 @@ namespace EnnsLab
 			}
 			foreach (GameObject stimulusObject in StimulusObjects)
 			{
+				Debug.Log(gameObject.name);
 				stimulusObject.GetComponent<Renderer>().enabled = true;
 				yield return new WaitForSecondsRealtime(Presentation_time);
 				stimulusObject.GetComponent<Renderer>().enabled = false;
@@ -362,6 +367,11 @@ namespace EnnsLab
 		void OnEnable()
 		{
 			//TODO: Add Terminate to some termination event in TrialDelegate
+		}
+
+		void OnDisable()
+		{
+
 		}
 		#endregion UnityLoop
 	}

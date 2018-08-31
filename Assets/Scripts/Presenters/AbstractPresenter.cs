@@ -28,6 +28,20 @@ public abstract class AbstractPresenter : MonoBehaviour
 
 	protected virtual void OnDisable()
 	{
+		ToBePresented.Clear();
+		if (trialDelegate != null)
+		{
+			TrialDelegate.ReadyToPresentStimuli -= Present;
+		}
+		else { return; }
+	}
+
+	protected virtual void OnDestroy()
+	{
+	}
+
+	protected virtual void UnsubscribePresent()
+	{
 		if (trialDelegate != null)
 		{
 			TrialDelegate.ReadyToPresentStimuli -= Present;

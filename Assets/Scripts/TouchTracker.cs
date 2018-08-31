@@ -31,9 +31,9 @@ public class TouchTracker : MonoBehaviour, IDataCollector {
 	public string Data()
 	{
 		var firstTouch = touches[0].x.ToString() + DataRecorder.separator + touches[0].y.ToString();
-		var firstTouchTime = touchTimes[0].ToString() + DataRecorder.separator + touchTimes[0].ToString();
+		var firstTouchTime = touchTimes[0].ToString();
 		var lastTouch = touches[touches.Count-1].x.ToString() + DataRecorder.separator + touches[touches.Count-1].y.ToString();
-		var lastTouchTime = touchTimes[touchTimes.Count - 1].ToString() + DataRecorder.separator + touchTimes[touchTimes.Count - 1].ToString();
+		var lastTouchTime = touchTimes[touchTimes.Count - 1].ToString();
 		return String.Join(DataRecorder.separator,
 			new List<string>
 			{
