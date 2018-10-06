@@ -24,6 +24,6 @@ function OnGUI(){
 	GUI.Box(Rect(Screen.width*0.05,Screen.height*.175,Screen.width*0.9,Screen.height*0.6),'Tap the "Start" button to start a block. Each block contains a number of trials and will take a few minutes to complete. During each trial, a shape will be presented. Please tap the shape as soon as possible to progress to the next trial.',wordsSkin);
 		
 	if(GUI.Button (Rect(Screen.width*.5-button_width/2,Screen.height*.5-button_height/2+button_height*2*1.12,button_width,button_height), "",backSkin)){
-		Application.LoadLevel(2);
+		SceneManagement.SceneManager.LoadScene(2);
 	}
 }

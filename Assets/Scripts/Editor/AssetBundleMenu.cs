@@ -35,18 +35,6 @@ public class AssetBundleMenu
 		return true;
 	}
 	
-	[MenuItem("AssetBundles/Build for Web")]
-	static void ToggleWebBuild ()
-	{
-		EditorPrefs.SetBool("buildWeb", !EditorPrefs.GetBool("buildWeb", false));
-	}
-	[MenuItem("AssetBundles/Build for Web", true)]
-	static bool ToggleWebBuildValidate ()
-	{
-		Menu.SetChecked("AssetBundles/Build for Web", EditorPrefs.GetBool("buildWeb", false));
-		return true;
-	}
-	
 	[MenuItem("AssetBundles/Build for iOS")]
 	static void ToggleiOSBuild ()
 	{
@@ -82,10 +70,7 @@ public class AssetBundleMenu
 				BuildBundle(path + "/PC", BuildTarget.StandaloneWindows);
 			
 			if(EditorPrefs.GetBool("buildOSX", false))
-				BuildBundle(path + "/OSX", BuildTarget.StandaloneOSXUniversal);
-			
-			if(EditorPrefs.GetBool("buildWeb", false))
-				BuildBundle(path + "/Web", BuildTarget.WebPlayer);
+				BuildBundle(path + "/OSX", BuildTarget.StandaloneOSX);
 			
 			if(EditorPrefs.GetBool("buildiOS", false))
 				BuildBundle(path + "/iOS", BuildTarget.iOS);

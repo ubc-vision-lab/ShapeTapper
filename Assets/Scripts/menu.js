@@ -19,6 +19,7 @@ function Start () {
 	UserIDSkin.fontSize = Screen.width/32;
 	blockMod = 1;
 	guiOn = true;
+	Debug.Log(PlayerPrefs.GetInt("line", 0));
 	
 	block = PlayerPrefs.GetInt("block", 0);
 	
@@ -53,7 +54,7 @@ function doWindow(){
 		PlayerPrefs.SetInt("numCorrect",0);
 		PlayerPrefs.SetInt("lastBlockLine", 0);
 		PlayerPrefs.SetInt("block",0);
-		Application.LoadLevel(0);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(0);
 	}
 	
 	if(GUI.Button (Rect(win_width*0.575,win_height*0.65,win_width*0.3,win_height*0.3), "Cancel")){
@@ -101,11 +102,11 @@ function OnGUI(){
 				PlayerPrefs.SetInt("numCorrect",0);
 				PlayerPrefs.SetInt("line", PlayerPrefs.GetInt("lastBlockLine",0));
 				PlayerPrefs.SetInt("feedbackLine", PlayerPrefs.GetInt("lastBlockLine",0));
-				Application.LoadLevel(4);
+				SceneManagement.SceneManager.LoadScene(5);
 			}
 			if(GUI.Button (Rect(Screen.width*.5-button_width/2,Screen.height*.5-button_height/2+button_height*1.12,button_width,button_height), "",helpSkin) && !popupFlag){
 				guiOn = false;
-				Application.LoadLevel(3);
+				SceneManagement.SceneManager.LoadScene(3);
 			}
 		}
 		else{
@@ -117,7 +118,7 @@ function OnGUI(){
 				PlayerPrefs.SetInt("line",0);
 				PlayerPrefs.SetInt("lastBlockLine", 0);
 				PlayerPrefs.SetInt("block",0);
-				Application.LoadLevel(0);
+				SceneManagement.SceneManager.LoadScene(0);
 			}
 		
 		}
